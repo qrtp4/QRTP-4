@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QRTP-4 Passport Issuer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { color: #58a6ff; margin-bottom: 8px; }
+    .subtitle { color: #8b949e; margin-bottom: 24px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    label { display: block; color: #8b949e; margin-bottom: 6px; font-size: 14px; }
+    input, select { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; font-size: 14px; margin-bottom: 16px; }
+    input:focus, select:focus { outline: none; border-color: #58a6ff; }
+    .btn { padding: 14px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; }
+    .btn-primary { background: #238636; color: #fff; width: 100%; }
+    .btn:hover { opacity: 0.9; }
+    .qr-container { text-align: center; margin-top: 20px; }
+    #qrcode { background: #fff; padding: 16px; border-radius: 12px; display: inline-block; }
+    .passport-info { margin-top: 16px; font-size: 13px; }
+    .passport-info div { padding: 4px 0; }
+    .passport-info b { color: #8b949e; }
+    code { background: #0d1117; padding: 2px 8px; border-radius: 4px; font-size: 12px; word-break: break-all; }
+    .copy-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 12px; font-size: 13px; }
+    .success { color: #3fb950; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QRTP-4 Passport Issuer</h1>
+    <p class="subtitle">Generate cryptographically signed passports</p>
+    
+    <div class="card">
+      <label>Asset Type</label>
+      <select id="typ">
+        <option value="token">Token</option>
+        <option value="wallet">Wallet</option>
+        <option value="product">Product</option>
+        <option value="document">Document</option>
+        <option value="ticket">Ticket</option>
+      </select>
+      
+      <label>Reference (address, serial, hash)</label>
+      <input type="text" id="ref" placeholder="e.g. xrp:rW6mfR5R8..." value="xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k" />
+      
+      <label>Label (optional)</label>
+      <input type="text" id="label" placeholder="e.g. Genesis Passport" value="QRTP-4 Genesis Passport" />
+      
+      <button class="btn btn-primary" id="issueBtn">Generate Passport</button>
+    </div>
+    
+    <div id="result" class="card hidden">
+      <h3 class="success">Passport Generated!</h3>
+      <div class="qr-container">
+        <div id="qrcode"></div>
+      </div>
+      <div class="passport-info">
+        <div><b>PID:</b> <code id="pidDisplay"></code></div>
+        <div><b>Type:</b> <code id="typDisplay"></code></div>
+        <div><b>Ref:</b> <code id="refDisplay"></code></div>
+        <div><b>Issued:</b> <code id="iatDisplay"></code></div>
+        <div><b>Issuer:</b> <code>qrtp4</code></div>
+      </div>
+      <button class="copy-btn" id="copyBtn">Copy Verify URL</button>
+      <p id="verifyUrl" style="margin-top:12px;word-break:break-all;font-size:11px;color:#8b949e;"></p>
+    </div>
+    
+    <p class="subtitle" style="margin-top:24px;font-size:12px;">QRTP-4 Protocol v0.1 | No Passport = No Trust</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    const ISSUER_ID = 'qrtp4';
+    const VERIFIER_URL = 'https://qrtp4.github.io/QRTP-4/';
+    
+    // Generate ULID-like ID
+    function ulid() {
+      const chars = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+      let id = '';
+      const now = Date.now();
+      for (let i = 9; i >= 0; i--) id += chars[(now / Math.pow(32, i)) % 32 | 0];
+      for (let i = 0; i < 16; i++) id += chars[Math.random() * 32 | 0];
+      return id;
+    }
+    
+    function b64urlFromBytes(bytes) {
+      let b64 = btoa(String.fromCharCode(...bytes));
+      return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+    
+    // Get or create keypair (stored in localStorage for demo)
+    function getKeyPair() {
+      const stored = localStorage.getItem('qrtp4_keypair');
+      if (stored) {
+        const { pub, sec } = JSON.parse(stored);
+        return {
+          publicKey: Uint8Array.from(atob(pub.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0)),
+          secretKey: Uint8Array.from(atob(sec.replace(/-/g,'+').replace(/_/g,'/')), c => c.charCodeAt(0))
+        };
+      }
+      const kp = nacl.sign.keyPair();
+      localStorage.setItem('qrtp4_keypair', JSON.stringify({
+        pub: b64urlFromBytes(kp.publicKey),
+        sec: b64urlFromBytes(kp.secretKey)
+      }));
+      return kp;
+    }
+    
+    document.getElementById('issueBtn').onclick = async function() {
+      const typ = document.getElementById('typ').value;
+      const ref = document.getElementById('ref').value.trim();
+      const label = document.getElementById('label').value.trim();
+      
+      if (!ref) { alert('Reference is required'); return; }
+      
+      const kp = getKeyPair();
+      const pid = ulid();
+      const iat = Math.floor(Date.now() / 1000);
+      
+      const payload = {
+        v: '0.1',
+        pid,
+        typ,
+        ref,
+        iss: ISSUER_ID,
+        iat,
+        exp: null,
+        meta: { label: label || 'QRTP-4 Passport' }
+      };
+      
+      const payloadBytes = new TextEncoder().encode(JSON.stringify(payload));
+      const sigBytes = nacl.sign.detached(payloadBytes, kp.secretKey);
+      
+      const envelope = {
+        t: 'QRTP4',
+        v: '0.1',
+        p: b64urlFromBytes(payloadBytes),
+        s: b64urlFromBytes(sigBytes)
+      };
+      
+      const verifyUrl = VERIFIER_URL + '#' + encodeURIComponent(JSON.stringify(envelope));
+      
+      // Show result
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('pidDisplay').textContent = pid;
+      document.getElementById('typDisplay').textContent = typ;
+      document.getElementById('refDisplay').textContent = ref;
+      document.getElementById('iatDisplay').textContent = new Date(iat * 1000).toISOString();
+      document.getElementById('verifyUrl').textContent = verifyUrl;
+      
+      // Generate QR
+      document.getElementById('qrcode').innerHTML = '';
+      QRCode.toCanvas(document.createElement('canvas'), verifyUrl, { width: 256, margin: 2 }, (err, canvas) => {
+        if (!err) document.getElementById('qrcode').appendChild(canvas);
+      });
+      
+      document.getElementById('copyBtn').onclick = () => {
+        navigator.clipboard.writeText(verifyUrl);
+        document.getElementById('copyBtn').textContent = 'Copied!';
+        setTimeout(() => document.getElementById('copyBtn').textContent = 'Copy Verify URL', 2000);
+      };
+      
+      // Save to registry (localStorage for demo)
+      const registry = JSON.parse(localStorage.getItem('qrtp4_registry') || '{}');
+      registry[pid] = { pid, status: 'issued', iss: ISSUER_ID, iat, typ, ref };
+      localStorage.setItem('qrtp4_registry', JSON.stringify(registry));
+      
+      console.log('Passport issued:', pid);
+      console.log('Public Key:', b64urlFromBytes(kp.publicKey));
+      console.log('Envelope:', JSON.stringify(envelope));
+    };
+  </script>
+</body>
+</html>

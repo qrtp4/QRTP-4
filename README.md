@@ -50,3 +50,29 @@ Active development.
 
 ## 📄 License
 MIT
+
+---
+
+## 🗺 Roadmap
+
+### Phase 1: Foundation (Current)
+- [x] Core registry structure
+- [x] Basic passport concept
+- [x] MIT License
+- [x] Genesis release v0.1.0
+
+### Phase 2: Verification Layer
+- [ ] Verification portal flow
+- [ ] Passport generation pipeline
+- [ ] QR code integration
+- [ ] Status check endpoints
+
+### Phase 3: Institutional Ready
+- [ ] Institution Portal
+- [ ] CBDC integration hooks
+- [ ] Multi-tier verification levels
+- [ ] Public registry API
+
+---
+
+> Built with 💛 by [qrtp4](https://github.com/qrtp4)

@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>QRTP-4 Donate</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:system-ui,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;padding:40px 20px}
@@ -17,8 +16,8 @@
     .title{color:#c9d1d9;font-size:16px;font-weight:600}
     .net{color:#6e7681;font-size:11px;margin-bottom:8px}
     .qr-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0}
-    .qr-frame{position:relative;padding:10px}
-    #qr-xrp{display:block;background:#fff;border-radius:8px}
+    .qr-frame{position:relative;padding:10px;background:#fff;border-radius:12px}
+    .qr-frame img{display:block;width:180px;height:180px}
     .corners{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
     .c{position:absolute;width:30px;height:30px;border:3px solid #58a6ff}
     .c.tl{top:0;left:0;border-right:none;border-bottom:none}
@@ -50,7 +49,7 @@
       <div class="section-title">XRP Donation</div>
       <div class="qr-wrap">
         <div class="qr-frame">
-          <canvas id="qr-xrp" width="180" height="180"></canvas>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k" alt="XRP QR Code">
           <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
         </div>
         <div class="qr-label">QRTP-4 XRP Wallet</div>
@@ -142,18 +141,6 @@
       t.style.display='block';
       setTimeout(()=>t.style.display='none',1500);
     }
-    
-    document.addEventListener('DOMContentLoaded', function(){
-      var canvas = document.getElementById('qr-xrp');
-      var addr = document.getElementById('a-xrp').textContent;
-      QRCode.toCanvas(canvas, addr, {
-        width: 180,
-        margin: 1,
-        color: { dark: '#000000', light: '#ffffff' }
-      }, function(error) {
-        if (error) console.error(error);
-      });
-    });
   </script>
 </body>
 </html>

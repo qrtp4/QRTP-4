@@ -79,10 +79,16 @@ const payloadObj = canonicalPayload({ pid, typ, ref, meta: { label } });
 const { payloadJson, payloadB64u, sigB64u } = signPayload(payloadObj, secretKey);
 
 const envelope = { t: "QRTP4", v: "0.1", p: payloadB64u, s: sigB64u };
-const qrText = JSON.stringify(envelope);
+// Encode envelope JSON to base64url token for URL hash (safe for all scanners)
+const envelopeJson = JSON.stringify(envelope);
+const envelopeToken = b64urlFromBytes(new TextEncoder().encode(envelopeJson));
 
+// Public verify link (Pages)
+const verifyUrl = `https://qrtp4.github.io/QRTP-4/#${envelopeToken}`;
+
+// QR now contains universal verify link instead of raw JSON
 const pngPath = path.join(OUT_DIR, `${pid}.png`);
-await QRCode.toFile(pngPath, qrText, { errorCorrectionLevel: "M", margin: 2, scale: 8 });
+await QRCode.toFile(pngPath, verifyUrl, { errorCorrectionLevel: "M", margin: 2, scale: 8 });
 
 const issuers = readJsonOrDefault(ISSUERS_PATH, {});
 issuers[ISSUER_ID] = b64urlFromBytes(publicKey);
@@ -92,7 +98,7 @@ const registry = readJsonOrDefault(REGISTRY_PATH, {});
 registry[pid] = { pid, status: "issued", iss: ISSUER_ID, iat: payloadObj.iat, typ, ref };
 writeJson(REGISTRY_PATH, registry);
 
-const out = { pid, envelope, pngPath };
+const out = { pid, envelope, verifyUrl };
 const outPath = path.join(OUT_DIR, `${pid}.json`);
 writeJson(outPath, out);
 

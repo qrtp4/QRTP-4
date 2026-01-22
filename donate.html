@@ -14,11 +14,11 @@
     .card-title { color: #58a6ff; font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .crypto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0d1117; border-radius: 8px; margin-bottom: 12px; }
     .crypto-name { font-weight: 600; color: #c9d1d9; }
-    .crypto-address { font-family: monospace; font-size: 11px; color: #8b949e; word-break: break-all; max-width: 280px; }
+    .crypto-network { font-size: 11px; color: #6e7681; }
+    .crypto-address { font-family: monospace; font-size: 10px; color: #8b949e; word-break: break-all; max-width: 260px; }
     .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
     .btn:hover { opacity: 0.9; }
     .btn-copy { background: #238636; color: #fff; font-size: 12px; }
-    .btn-primary { background: #238636; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
     .btn-sponsor { background: #bf3989; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
     .qrtp4-qr { position: relative; width: 220px; height: 220px; margin: 0 auto; }
     .qrtp4-qr canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
@@ -43,7 +43,7 @@
 
     <!-- QRTP-4 Style QR with XRP -->
     <div class="card xrp-highlight">
-      <div class="card-title">XRP Donation (Recommended)</div>
+      <div class="card-title">XRP Donation</div>
       <div class="qrtp4-qr">
         <div class="qrtp4-corners">
           <div class="qrtp4-corner tl"></div>
@@ -57,10 +57,9 @@
       <div class="crypto-item" style="margin-top: 16px;">
         <div>
           <div class="crypto-name">XRP (Ripple)</div>
-          <div class="crypto-address" id="xrp-addr">rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9</div>
-          <div style="font-size: 11px; color: #6e7681; margin-top: 4px;">Destination Tag: <span id="xrp-tag">123456</span></div>
+          <div class="crypto-address" id="xrp-addr">rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k</div>
         </div>
-        <button class="btn btn-copy" onclick="copyXrp()">Copy</button>
+        <button class="btn btn-copy" onclick="copyAddr('xrp-addr')">Copy</button>
       </div>
     </div>
 
@@ -71,31 +70,60 @@
       <div class="crypto-item">
         <div>
           <div class="crypto-name">Bitcoin (BTC)</div>
-          <div class="crypto-address" id="btc-addr">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+          <div class="crypto-address" id="btc-addr">1GU9iELtz57HuafaDLackXM8TWxHixXeBx</div>
         </div>
         <button class="btn btn-copy" onclick="copyAddr('btc-addr')">Copy</button>
       </div>
       
       <div class="crypto-item">
         <div>
-          <div class="crypto-name">Ethereum (ETH)</div>
-          <div class="crypto-address" id="eth-addr">0x742d35Cc6634C0532925a3b844Bc9e7595f2bD38</div>
+          <div class="crypto-name">ETH / ERC20</div>
+          <div class="crypto-network">Ethereum Network</div>
+          <div class="crypto-address" id="eth-addr">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
         </div>
         <button class="btn btn-copy" onclick="copyAddr('eth-addr')">Copy</button>
       </div>
       
       <div class="crypto-item">
         <div>
-          <div class="crypto-name">USDT (TRC20)</div>
-          <div class="crypto-address" id="usdt-addr">TJYvGxk9Z3p3K8FYhWvRYJfZDqcTVCZAbe</div>
+          <div class="crypto-name">BNB / BEP20</div>
+          <div class="crypto-network">Binance Smart Chain</div>
+          <div class="crypto-address" id="bnb-addr">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
         </div>
-        <button class="btn btn-copy" onclick="copyAddr('usdt-addr')">Copy</button>
+        <button class="btn btn-copy" onclick="copyAddr('bnb-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">USDT TRC20</div>
+          <div class="crypto-network">Tron Network</div>
+          <div class="crypto-address" id="usdt-trc-addr">TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('usdt-trc-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">USDT BEP20</div>
+          <div class="crypto-network">Binance Smart Chain</div>
+          <div class="crypto-address" id="usdt-bep-addr">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('usdt-bep-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">USDC POL</div>
+          <div class="crypto-network">Polygon Network</div>
+          <div class="crypto-address" id="usdc-pol-addr">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('usdc-pol-addr')">Copy</button>
       </div>
       
       <div class="crypto-item">
         <div>
           <div class="crypto-name">Solana (SOL)</div>
-          <div class="crypto-address" id="sol-addr">9WzDXwBbmPXUvFSvRiiGerJgRFMcLQF3fDNpYHxVBz4c</div>
+          <div class="crypto-address" id="sol-addr">G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd</div>
         </div>
         <button class="btn btn-copy" onclick="copyAddr('sol-addr')">Copy</button>
       </div>
@@ -130,13 +158,6 @@
       showToast('Address copied!');
     }
 
-    function copyXrp() {
-      const addr = document.getElementById('xrp-addr').textContent;
-      const tag = document.getElementById('xrp-tag').textContent;
-      navigator.clipboard.writeText(addr + ' (Tag: ' + tag + ')');
-      showToast('XRP address + tag copied!');
-    }
-
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -146,7 +167,7 @@
 
     window.onload = function() {
       const xrpAddr = document.getElementById('xrp-addr').textContent;
-      QRCode.toCanvas(document.getElementById('xrpQrCanvas'), 'xrp:' + xrpAddr + '?dt=123456', {
+      QRCode.toCanvas(document.getElementById('xrpQrCanvas'), 'xrp:' + xrpAddr, {
         width: 160,
         margin: 1,
         color: { dark: '#58a6ff', light: '#0d1117' }

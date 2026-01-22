@@ -17,14 +17,14 @@
     .title{color:#c9d1d9;font-size:16px;font-weight:600}
     .net{color:#6e7681;font-size:11px;margin-bottom:8px}
     .qr-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0}
-    .qr-frame{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
-    .qr-frame canvas{border-radius:8px}
+    .qr-frame{position:relative;padding:10px}
+    #qr-xrp{display:block;background:#fff;border-radius:8px}
     .corners{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
     .c{position:absolute;width:30px;height:30px;border:3px solid #58a6ff}
-    .c.tl{top:-5px;left:-5px;border-right:none;border-bottom:none}
-    .c.tr{top:-5px;right:-5px;border-left:none;border-bottom:none}
-    .c.bl{bottom:-5px;left:-5px;border-right:none;border-top:none}
-    .c.br{bottom:-5px;right:-5px;border-left:none;border-top:none}
+    .c.tl{top:0;left:0;border-right:none;border-bottom:none}
+    .c.tr{top:0;right:0;border-left:none;border-bottom:none}
+    .c.bl{bottom:0;left:0;border-right:none;border-top:none}
+    .c.br{bottom:0;right:0;border-left:none;border-top:none}
     .qr-label{color:#58a6ff;font-size:13px;margin-top:12px}
     .row{display:flex;align-items:center;gap:12px;background:#0d1117;padding:12px;border-radius:8px;margin-top:12px}
     .row-info{flex:1;min-width:0}
@@ -50,7 +50,7 @@
       <div class="section-title">XRP Donation</div>
       <div class="qr-wrap">
         <div class="qr-frame">
-          <canvas id="qr-xrp"></canvas>
+          <canvas id="qr-xrp" width="180" height="180"></canvas>
           <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
         </div>
         <div class="qr-label">QRTP-4 XRP Wallet</div>
@@ -142,10 +142,18 @@
       t.style.display='block';
       setTimeout(()=>t.style.display='none',1500);
     }
-    window.onload=function(){
-      const xrpAddr=document.getElementById('a-xrp').textContent;
-      QRCode.toCanvas(document.getElementById('qr-xrp'),xrpAddr,{width:180,margin:2,color:{dark:'#000',light:'#fff'}});
-    };
+    
+    document.addEventListener('DOMContentLoaded', function(){
+      var canvas = document.getElementById('qr-xrp');
+      var addr = document.getElementById('a-xrp').textContent;
+      QRCode.toCanvas(canvas, addr, {
+        width: 180,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' }
+      }, function(error) {
+        if (error) console.error(error);
+      });
+    });
   </script>
 </body>
 </html>

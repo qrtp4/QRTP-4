@@ -1,0 +1,11 @@
+{
+  "name": "qrtp4-issuer",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "tweetnacl": "^1.0.3",
+    "ulid": "^2.3.0"
+  }
+}

@@ -14,26 +14,26 @@
     .card-title { color: #58a6ff; font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
     .crypto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0d1117; border-radius: 8px; margin-bottom: 12px; }
     .crypto-name { font-weight: 600; color: #c9d1d9; }
-    .crypto-address { font-family: monospace; font-size: 12px; color: #8b949e; word-break: break-all; max-width: 300px; }
+    .crypto-address { font-family: monospace; font-size: 11px; color: #8b949e; word-break: break-all; max-width: 280px; }
     .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
     .btn:hover { opacity: 0.9; }
     .btn-copy { background: #238636; color: #fff; font-size: 12px; }
     .btn-primary { background: #238636; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
     .btn-sponsor { background: #bf3989; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
-    .tier { border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s; }
-    .tier:hover { border-color: #58a6ff; }
-    .tier.selected { border-color: #238636; background: #0d1117; }
-    .tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .tier-name { font-weight: 600; color: #c9d1d9; }
-    .tier-price { color: #238636; font-weight: 700; }
-    .tier-desc { color: #8b949e; font-size: 14px; }
-    .qr-container { text-align: center; padding: 20px; }
-    .qr-container canvas { background: #fff; padding: 16px; border-radius: 8px; }
+    .qrtp4-qr { position: relative; width: 220px; height: 220px; margin: 0 auto; }
+    .qrtp4-qr canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .qrtp4-corners { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    .qrtp4-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #58a6ff; }
+    .qrtp4-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+    .qrtp4-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+    .qrtp4-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+    .qrtp4-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+    .qr-label { text-align: center; margin-top: 12px; color: #58a6ff; font-weight: 600; font-size: 14px; }
     .footer { margin-top: 40px; text-align: center; color: #8b949e; font-size: 14px; }
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #238636; color: #fff; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000; }
     .links { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
     .links a { color: #58a6ff; text-decoration: none; }
-    .links a:hover { text-decoration: underline; }
+    .xrp-highlight { border: 2px solid #23292f; background: linear-gradient(135deg, #161b22 0%, #1a2332 100%); }
   </style>
 </head>
 <body>
@@ -41,9 +41,32 @@
     <h1>Support QRTP-4</h1>
     <p class="subtitle">Help us build the future of QR Token Passports</p>
 
-    <!-- Crypto Donations -->
+    <!-- QRTP-4 Style QR with XRP -->
+    <div class="card xrp-highlight">
+      <div class="card-title">XRP Donation (Recommended)</div>
+      <div class="qrtp4-qr">
+        <div class="qrtp4-corners">
+          <div class="qrtp4-corner tl"></div>
+          <div class="qrtp4-corner tr"></div>
+          <div class="qrtp4-corner bl"></div>
+          <div class="qrtp4-corner br"></div>
+        </div>
+        <canvas id="xrpQrCanvas"></canvas>
+      </div>
+      <p class="qr-label">QRTP-4 XRP Wallet</p>
+      <div class="crypto-item" style="margin-top: 16px;">
+        <div>
+          <div class="crypto-name">XRP (Ripple)</div>
+          <div class="crypto-address" id="xrp-addr">rN7n3473SaZBCG4dFL83w7a1RXtXtbk2D9</div>
+          <div style="font-size: 11px; color: #6e7681; margin-top: 4px;">Destination Tag: <span id="xrp-tag">123456</span></div>
+        </div>
+        <button class="btn btn-copy" onclick="copyXrp()">Copy</button>
+      </div>
+    </div>
+
+    <!-- Other Crypto -->
     <div class="card">
-      <div class="card-title">Crypto Donations</div>
+      <div class="card-title">Other Crypto</div>
       
       <div class="crypto-item">
         <div>
@@ -78,72 +101,17 @@
       </div>
     </div>
 
-    <!-- Sponsorship Tiers -->
+    <!-- Sponsorship -->
     <div class="card">
-      <div class="card-title">Sponsorship Tiers</div>
-      
-      <div class="tier" onclick="selectTier(this, 5)">
-        <div class="tier-header">
-          <span class="tier-name">Supporter</span>
-          <span class="tier-price">$5/month</span>
-        </div>
-        <p class="tier-desc">Your name in our supporters list</p>
-      </div>
-      
-      <div class="tier" onclick="selectTier(this, 15)">
-        <div class="tier-header">
-          <span class="tier-name">Backer</span>
-          <span class="tier-price">$15/month</span>
-        </div>
-        <p class="tier-desc">Early access to new features + Supporter perks</p>
-      </div>
-      
-      <div class="tier" onclick="selectTier(this, 50)">
-        <div class="tier-header">
-          <span class="tier-name">Sponsor</span>
-          <span class="tier-price">$50/month</span>
-        </div>
-        <p class="tier-desc">Logo on README + Priority support + All perks</p>
-      </div>
-      
+      <div class="card-title">GitHub Sponsors</div>
+      <p style="color: #8b949e; margin-bottom: 16px;">Monthly support with perks</p>
       <a href="https://github.com/sponsors/qrtp4" target="_blank" style="text-decoration: none;">
-        <button class="btn btn-sponsor">Become a GitHub Sponsor</button>
+        <button class="btn btn-sponsor">Become a Sponsor</button>
       </a>
-    </div>
-
-    <!-- One-time Donation -->
-    <div class="card">
-      <div class="card-title">One-time Donation</div>
-      <p style="color: #8b949e; margin-bottom: 16px;">Support with a custom amount</p>
-      
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(10)">$10</button>
-        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(25)">$25</button>
-        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(50)">$50</button>
-        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(100)">$100</button>
-      </div>
-      
-      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 16px;">
-        <span style="color: #8b949e;">$</span>
-        <input type="number" id="customAmount" value="25" min="1" style="flex: 1; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 16px;" />
-      </div>
-      
-      <a href="https://ko-fi.com/qrtp4" target="_blank" style="text-decoration: none;">
-        <button class="btn btn-primary">Donate via Ko-fi</button>
-      </a>
-    </div>
-
-    <!-- QR Code for quick payment -->
-    <div class="card">
-      <div class="card-title">Quick Pay QR</div>
-      <div class="qr-container">
-        <canvas id="qrCanvas"></canvas>
-        <p style="color: #8b949e; margin-top: 12px; font-size: 14px;">Scan to donate ETH</p>
-      </div>
     </div>
 
     <div class="footer">
-      <p>QRTP-4 — No Passport = No Trust</p>
+      <p>QRTP-4 - No Passport = No Trust</p>
       <div class="links">
         <a href="https://github.com/qrtp4/QRTP-4">GitHub</a>
         <a href="index.html">Verifier</a>
@@ -152,30 +120,23 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">Copied to clipboard!</div>
+  <div class="toast" id="toast">Copied!</div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script>
-    // Copy address to clipboard
     function copyAddr(id) {
       const addr = document.getElementById(id).textContent;
       navigator.clipboard.writeText(addr);
       showToast('Address copied!');
     }
 
-    // Select sponsorship tier
-    function selectTier(el, amount) {
-      document.querySelectorAll('.tier').forEach(t => t.classList.remove('selected'));
-      el.classList.add('selected');
-      showToast('Selected $' + amount + '/month tier');
+    function copyXrp() {
+      const addr = document.getElementById('xrp-addr').textContent;
+      const tag = document.getElementById('xrp-tag').textContent;
+      navigator.clipboard.writeText(addr + ' (Tag: ' + tag + ')');
+      showToast('XRP address + tag copied!');
     }
 
-    // Set custom amount
-    function setAmount(val) {
-      document.getElementById('customAmount').value = val;
-    }
-
-    // Show toast notification
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -183,13 +144,12 @@
       setTimeout(() => toast.style.display = 'none', 2000);
     }
 
-    // Generate QR code for ETH address
     window.onload = function() {
-      const ethAddr = document.getElementById('eth-addr').textContent;
-      QRCode.toCanvas(document.getElementById('qrCanvas'), 'ethereum:' + ethAddr, {
-        width: 200,
-        margin: 2,
-        color: { dark: '#000000', light: '#ffffff' }
+      const xrpAddr = document.getElementById('xrp-addr').textContent;
+      QRCode.toCanvas(document.getElementById('xrpQrCanvas'), 'xrp:' + xrpAddr + '?dt=123456', {
+        width: 160,
+        margin: 1,
+        color: { dark: '#58a6ff', light: '#0d1117' }
       });
     };
   </script>

@@ -22,10 +22,10 @@ jobs:
         run: |
           npm ci || npm install
 
-      - name: Sanity check: secrets must not be committed
+      - name: Sanity check - secrets must not be committed
         run: |
           if [ -f "issuer/keys.json" ]; then
-            echo "❌ issuer/keys.json is present in repo. NEVER commit private keys."
+            echo "[ERROR] issuer/keys.json is present in repo. NEVER commit private keys."
             exit 1
           fi
 
@@ -48,10 +48,10 @@ jobs:
         run: |
           node issue.js wallet "ci:ref001" "CI Passport"
 
-      - name: Validate registry updated (pid exists and status is issued)
+      - name: Validate registry updated
         run: |
           node scripts/check-registry.js verifier/registry.json
 
       - name: Basic Pages files check
         run: |
-          test -f index.html || (echo "❌ index.html missing at repo root for GitHub Pages" && exit 1)
+          test -f index.html || (echo "[ERROR] index.html missing at repo root" && exit 1)

@@ -1,0 +1,57 @@
+name: QRTP-4 CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  issuer-and-registry-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install issuer deps
+        working-directory: issuer
+        run: |
+          npm ci || npm install
+
+      - name: Sanity check: secrets must not be committed
+        run: |
+          if [ -f "issuer/keys.json" ]; then
+            echo "❌ issuer/keys.json is present in repo. NEVER commit private keys."
+            exit 1
+          fi
+
+      - name: Validate JSON files exist
+        run: |
+          test -f verifier/issuers.json
+          test -f verifier/registry.json
+
+      - name: Validate JSON syntax
+        run: |
+          node scripts/validate-json.js verifier/issuers.json
+          node scripts/validate-json.js verifier/registry.json
+
+      - name: Validate issuers.json is not placeholder
+        run: |
+          node scripts/check-issuers.js verifier/issuers.json
+
+      - name: Issue a CI passport (local run)
+        working-directory: issuer
+        run: |
+          node issue.js wallet "ci:ref001" "CI Passport"
+
+      - name: Validate registry updated (pid exists and status is issued)
+        run: |
+          node scripts/check-registry.js verifier/registry.json
+
+      - name: Basic Pages files check
+        run: |
+          test -f index.html || (echo "❌ index.html missing at repo root for GitHub Pages" && exit 1)

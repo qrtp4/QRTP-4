@@ -1,0 +1,56 @@
+[
+  {
+    "id": "xrp",
+    "title": "XRP (Ripple)",
+    "address": "rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k",
+    "qrImg": "./qr/xrp.png"
+  },
+  {
+    "id": "btc",
+    "title": "Bitcoin (BTC)",
+    "address": "1GU91ELtz57HuafaDLackXM8TWxHixXeBx",
+    "qrImg": "./qr/btc.png"
+  },
+  {
+    "id": "eth",
+    "title": "ETH / ERC20",
+    "network": "Ethereum Network",
+    "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
+    "qrImg": "./qr/eth.png"
+  },
+  {
+    "id": "bnb",
+    "title": "BNB / BEP20",
+    "network": "Binance Smart Chain",
+    "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
+    "qrImg": "./qr/bnb.png"
+  },
+  {
+    "id": "usdt-trc",
+    "title": "USDT TRC20",
+    "network": "Tron Network",
+    "address": "TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY",
+    "qrImg": "./qr/usdt-trc.png"
+  },
+  {
+    "id": "usdt-bep",
+    "title": "USDT BEP20",
+    "network": "Binance Smart Chain",
+    "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
+    "qrImg": "./qr/usdt-bep.png"
+  },
+  {
+    "id": "usdc-pol",
+    "title": "USDC POL",
+    "network": "Polygon Network",
+    "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
+    "qrImg": "./qr/usdc-pol.png"
+  },
+  {
+    "id": "sol",
+    "title": "Solana (SOL)",
+    "network": "Solana Network",
+    "address": "G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd",
+    "qrImg": "./qr/sol.png"
+  }
+]

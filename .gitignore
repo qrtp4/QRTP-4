@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Issuer output (QR codes, JSON passports)
+issuer/out/
+
+# Private keys - NEVER commit!
+issuer/keys.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*

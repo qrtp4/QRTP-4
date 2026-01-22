@@ -104,4 +104,4 @@ writeJson(outPath, out);
 
 console.log("Issued passport:", pid);
 console.log("PNG:", pngPath);
-console.log("Envelope:", qrText);
+console.log("Envelope:", JSON.stringify(envelope));

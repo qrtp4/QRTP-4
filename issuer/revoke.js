@@ -46,7 +46,11 @@ switch (action) {
     registry[pid].status = "suspended";
     break;
   case "reinstate":
-    registry[pid].status = "issued";
+        if (oldStatus === "revoked") {
+      console.error("Cannot reinstate revoked passport. Revocation is permanent.");
+      process.exit(1);
+    }
+registry[pid].status = "issued";
     break;
   default:
     console.error("Unknown action:", action);

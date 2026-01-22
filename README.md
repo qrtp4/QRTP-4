@@ -2,6 +2,10 @@
 **QR Token Passport Registry**  
 Identity • Verification • Anti-Fake • Trust Layer
 
+![Views](https://komarev.com/ghpvc/?username=qrtp4&label=Profile%20Views&color=blue&style=flat)
+![GitHub stars](https://img.shields.io/github/stars/qrtp4/QRTP-4?style=social)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/qrtp4)
+
 > **No Passport = No Trust.**
 
 ---

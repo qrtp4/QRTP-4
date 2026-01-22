@@ -7,25 +7,32 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 40px 20px; }
-    .container { max-width: 800px; margin: 0 auto; }
+    .container { max-width: 600px; margin: 0 auto; }
     h1 { color: #58a6ff; margin-bottom: 8px; text-align: center; }
     .subtitle { color: #8b949e; margin-bottom: 32px; text-align: center; }
-    .wallets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .wallet-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; text-align: center; }
-    .wallet-card.featured { border: 2px solid #58a6ff; background: linear-gradient(135deg, #161b22 0%, #1a2332 100%); }
-    .wallet-title { color: #58a6ff; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-    .wallet-network { color: #6e7681; font-size: 11px; margin-bottom: 12px; }
-    .qrtp4-qr { position: relative; width: 180px; height: 180px; margin: 0 auto 12px; }
-    .qrtp4-qr canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    .qrtp4-corners { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-    .qrtp4-corner { position: absolute; width: 30px; height: 30px; border: 3px solid #58a6ff; }
-    .qrtp4-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
-    .qrtp4-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
-    .qrtp4-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
-    .qrtp4-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
-    .wallet-address { font-family: monospace; font-size: 9px; color: #8b949e; word-break: break-all; margin-bottom: 12px; padding: 8px; background: #0d1117; border-radius: 6px; }
-    .btn-copy { background: #238636; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; }
-    .btn-copy:hover { opacity: 0.9; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .card.featured { border: 2px solid #58a6ff; }
+    .card-title { color: #58a6ff; font-size: 18px; margin-bottom: 16px; }
+    .qr-wrapper { position: relative; width: 280px; height: 280px; margin: 0 auto 16px; display: none; }
+    .qr-wrapper.show { display: block; }
+    .qr-corners { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    .qr-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #58a6ff; }
+    .qr-corner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+    .qr-corner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+    .qr-corner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+    .qr-corner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+    .qr-wrapper canvas { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .qr-label { text-align: center; color: #58a6ff; font-weight: 600; margin-top: 8px; }
+    .wallet-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: #0d1117; border-radius: 8px; margin-bottom: 12px; }
+    .wallet-info { flex: 1; min-width: 0; }
+    .wallet-name { font-weight: 600; color: #c9d1d9; }
+    .wallet-network { font-size: 11px; color: #6e7681; }
+    .wallet-addr { font-family: monospace; font-size: 10px; color: #8b949e; word-break: break-all; }
+    .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+    .btn-qr { background: #21262d; color: #58a6ff; border: 1px solid #30363d; }
+    .btn-qr.active { background: #58a6ff; color: #0d1117; }
+    .btn-copy { background: #238636; color: #fff; }
+    .btn:hover { opacity: 0.9; }
     .footer { margin-top: 40px; text-align: center; color: #8b949e; font-size: 14px; }
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #238636; color: #fff; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000; }
     .links { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
@@ -35,148 +42,99 @@
 <body>
   <div class="container">
     <h1>Support QRTP-4</h1>
-    <p class="subtitle">Scan QR code to donate - QRTP-4 style</p>
+    <p class="subtitle">QR for scan, Copy for bank transfer</p>
 
-    <div class="wallets-grid">
-      <!-- XRP -->
-      <div class="wallet-card featured">
-        <div class="wallet-title">XRP (Ripple)</div>
-        <div class="wallet-network">XRP Ledger</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-xrp"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-xrp">rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k</div>
-        <button class="btn-copy" onclick="copy('addr-xrp')">Copy Address</button>
+    <div class="card featured">
+      <div class="card-title">XRP Donation</div>
+      <div class="qr-wrapper show" id="qr-xrp">
+        <div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div>
+        <canvas id="canvas-xrp"></canvas>
+      </div>
+      <p class="qr-label">QRTP-4 XRP Wallet</p>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">XRP (Ripple)</div><div class="wallet-addr" id="addr-xrp">rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k</div></div>
+        <button class="btn btn-qr active" onclick="toggleQR('xrp',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-xrp')">Copy</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Other Crypto</div>
+
+      <div class="qr-wrapper" id="qr-btc"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-btc"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">Bitcoin (BTC)</div><div class="wallet-addr" id="addr-btc">1GU9iELtz57HuafaDLackXM8TWxHixXeBx</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('btc',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-btc')">Copy</button>
       </div>
 
-      <!-- BTC -->
-      <div class="wallet-card">
-        <div class="wallet-title">Bitcoin (BTC)</div>
-        <div class="wallet-network">Bitcoin Network</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-btc"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-btc">1GU9iELtz57HuafaDLackXM8TWxHixXeBx</div>
-        <button class="btn-copy" onclick="copy('addr-btc')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-eth"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-eth"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">ETH / ERC20</div><div class="wallet-network">Ethereum Network</div><div class="wallet-addr" id="addr-eth">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('eth',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-eth')">Copy</button>
       </div>
 
-      <!-- ETH -->
-      <div class="wallet-card">
-        <div class="wallet-title">ETH / ERC20</div>
-        <div class="wallet-network">Ethereum Network</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-eth"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-eth">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-        <button class="btn-copy" onclick="copy('addr-eth')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-bnb"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-bnb"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">BNB / BEP20</div><div class="wallet-network">Binance Smart Chain</div><div class="wallet-addr" id="addr-bnb">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('bnb',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-bnb')">Copy</button>
       </div>
 
-      <!-- BNB -->
-      <div class="wallet-card">
-        <div class="wallet-title">BNB / BEP20</div>
-        <div class="wallet-network">Binance Smart Chain</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-bnb"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-bnb">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-        <button class="btn-copy" onclick="copy('addr-bnb')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-usdt-trc"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-usdt-trc"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">USDT TRC20</div><div class="wallet-network">Tron Network</div><div class="wallet-addr" id="addr-usdt-trc">TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('usdt-trc',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-usdt-trc')">Copy</button>
       </div>
 
-      <!-- USDT TRC20 -->
-      <div class="wallet-card">
-        <div class="wallet-title">USDT TRC20</div>
-        <div class="wallet-network">Tron Network</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-usdt-trc"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-usdt-trc">TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY</div>
-        <button class="btn-copy" onclick="copy('addr-usdt-trc')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-usdt-bep"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-usdt-bep"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">USDT BEP20</div><div class="wallet-network">Binance Smart Chain</div><div class="wallet-addr" id="addr-usdt-bep">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('usdt-bep',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-usdt-bep')">Copy</button>
       </div>
 
-      <!-- USDT BEP20 -->
-      <div class="wallet-card">
-        <div class="wallet-title">USDT BEP20</div>
-        <div class="wallet-network">Binance Smart Chain</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-usdt-bep"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-usdt-bep">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-        <button class="btn-copy" onclick="copy('addr-usdt-bep')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-usdc-pol"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-usdc-pol"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">USDC POL</div><div class="wallet-network">Polygon Network</div><div class="wallet-addr" id="addr-usdc-pol">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('usdc-pol',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-usdc-pol')">Copy</button>
       </div>
 
-      <!-- USDC POL -->
-      <div class="wallet-card">
-        <div class="wallet-title">USDC POL</div>
-        <div class="wallet-network">Polygon Network</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-usdc-pol"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-usdc-pol">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-        <button class="btn-copy" onclick="copy('addr-usdc-pol')">Copy Address</button>
-      </div>
-
-      <!-- SOL -->
-      <div class="wallet-card">
-        <div class="wallet-title">Solana (SOL)</div>
-        <div class="wallet-network">Solana Network</div>
-        <div class="qrtp4-qr">
-          <div class="qrtp4-corners"><div class="qrtp4-corner tl"></div><div class="qrtp4-corner tr"></div><div class="qrtp4-corner bl"></div><div class="qrtp4-corner br"></div></div>
-          <canvas id="qr-sol"></canvas>
-        </div>
-        <div class="wallet-address" id="addr-sol">G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd</div>
-        <button class="btn-copy" onclick="copy('addr-sol')">Copy Address</button>
+      <div class="qr-wrapper" id="qr-sol"><div class="qr-corners"><div class="qr-corner tl"></div><div class="qr-corner tr"></div><div class="qr-corner bl"></div><div class="qr-corner br"></div></div><canvas id="canvas-sol"></canvas></div>
+      <div class="wallet-row">
+        <div class="wallet-info"><div class="wallet-name">Solana (SOL)</div><div class="wallet-addr" id="addr-sol">G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd</div></div>
+        <button class="btn btn-qr" onclick="toggleQR('sol',this)">QRTP-4</button>
+        <button class="btn btn-copy" onclick="copy('addr-sol')">Copy</button>
       </div>
     </div>
 
     <div class="footer">
       <p>QRTP-4 - No Passport = No Trust</p>
-      <div class="links">
-        <a href="https://github.com/qrtp4/QRTP-4">GitHub</a>
-        <a href="index.html">Verifier</a>
-        <a href="issue.html">Issuer</a>
-      </div>
+      <div class="links"><a href="https://github.com/qrtp4/QRTP-4">GitHub</a><a href="index.html">Verifier</a><a href="issue.html">Issuer</a></div>
     </div>
   </div>
 
   <div class="toast" id="toast">Copied!</div>
-
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script>
-    const wallets = [
-      { id: 'xrp', prefix: 'xrp:' },
-      { id: 'btc', prefix: 'bitcoin:' },
-      { id: 'eth', prefix: 'ethereum:' },
-      { id: 'bnb', prefix: '' },
-      { id: 'usdt-trc', prefix: '' },
-      { id: 'usdt-bep', prefix: '' },
-      { id: 'usdc-pol', prefix: '' },
-      { id: 'sol', prefix: 'solana:' }
-    ];
-
+    const ids = ['xrp','btc','eth','bnb','usdt-trc','usdt-bep','usdc-pol','sol'];
     function copy(id) {
-      const addr = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(addr);
-      const toast = document.getElementById('toast');
-      toast.textContent = 'Address copied!';
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 2000);
+      navigator.clipboard.writeText(document.getElementById(id).textContent);
+      const t = document.getElementById('toast'); t.textContent = 'Copied!'; t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2000);
     }
-
+    function toggleQR(id, btn) {
+      const el = document.getElementById('qr-' + id);
+      const isShow = el.classList.toggle('show');
+      btn.classList.toggle('active', isShow);
+    }
     window.onload = function() {
-      wallets.forEach(w => {
-        const addr = document.getElementById('addr-' + w.id).textContent;
-        QRCode.toCanvas(document.getElementById('qr-' + w.id), w.prefix + addr, {
-          width: 140,
-          margin: 1,
-          color: { dark: '#58a6ff', light: '#0d1117' }
-        });
+      ids.forEach(id => {
+        const addr = document.getElementById('addr-' + id).textContent;
+        QRCode.toCanvas(document.getElementById('canvas-' + id), addr, { width: 220, margin: 1, color: { dark: '#000', light: '#fff' } });
       });
     };
   </script>

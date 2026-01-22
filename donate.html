@@ -13,105 +13,139 @@
     .sub{color:#8b949e;text-align:center;margin-bottom:32px}
     .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:20px;margin-bottom:16px}
     .card.main{border:2px solid #58a6ff}
-    .title{color:#58a6ff;font-size:16px;margin-bottom:4px}
+    .section-title{color:#58a6ff;font-size:18px;margin-bottom:16px}
+    .title{color:#c9d1d9;font-size:16px;font-weight:600}
     .net{color:#6e7681;font-size:11px;margin-bottom:8px}
-    .qr-box{display:none;position:relative;width:240px;height:240px;margin:16px auto;background:#fff;border-radius:8px}
-    .qr-box.show{display:block}
-    .qr-box img{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px}
+    .qr-wrap{display:flex;flex-direction:column;align-items:center;margin:16px 0}
+    .qr-frame{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+    .qr-frame canvas{border-radius:8px}
     .corners{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-    .c{position:absolute;width:35px;height:35px;border:4px solid #58a6ff}
-    .c.tl{top:5px;left:5px;border-right:none;border-bottom:none}
-    .c.tr{top:5px;right:5px;border-left:none;border-bottom:none}
-    .c.bl{bottom:5px;left:5px;border-right:none;border-top:none}
-    .c.br{bottom:5px;right:5px;border-left:none;border-top:none}
-    .addr{font-family:monospace;font-size:10px;color:#8b949e;word-break:break-all;background:#0d1117;padding:10px;border-radius:6px;margin:12px 0}
-    .btns{display:flex;gap:10px}
-    .btn{flex:1;padding:12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:14px}
-    .btn-qr{background:#21262d;color:#58a6ff;border:1px solid #30363d}
-    .btn-qr.on{background:#58a6ff;color:#0d1117}
-    .btn-copy{background:#238636;color:#fff}
+    .c{position:absolute;width:30px;height:30px;border:3px solid #58a6ff}
+    .c.tl{top:-5px;left:-5px;border-right:none;border-bottom:none}
+    .c.tr{top:-5px;right:-5px;border-left:none;border-bottom:none}
+    .c.bl{bottom:-5px;left:-5px;border-right:none;border-top:none}
+    .c.br{bottom:-5px;right:-5px;border-left:none;border-top:none}
+    .qr-label{color:#58a6ff;font-size:13px;margin-top:12px}
+    .row{display:flex;align-items:center;gap:12px;background:#0d1117;padding:12px;border-radius:8px;margin-top:12px}
+    .row-info{flex:1;min-width:0}
+    .row .title{margin-bottom:2px}
+    .addr{font-family:monospace;font-size:11px;color:#8b949e;word-break:break-all}
+    .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;background:#238636;color:#fff}
+    .btn:hover{background:#2ea043}
+    .other{margin-top:24px}
+    .other .section-title{margin-bottom:12px}
+    .crypto-row{display:flex;align-items:center;gap:12px;background:#161b22;border:1px solid #30363d;padding:14px;border-radius:10px;margin-bottom:10px}
+    .crypto-row .row-info{flex:1;min-width:0}
     .footer{margin-top:32px;text-align:center;color:#6e7681;font-size:13px}
     .footer a{color:#58a6ff;text-decoration:none}
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#238636;color:#fff;padding:12px 24px;border-radius:8px;display:none}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#238636;color:#fff;padding:12px 24px;border-radius:8px;display:none;z-index:100}
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>Support QRTP-4</h1>
-  <p class="sub">QRTP-4 = QR scan | Copy = bank transfer</p>
-
-  <div class="card main" id="w-xrp">
-    <div class="title">XRP (Ripple)</div>
-    <div class="net">XRP Ledger</div>
-    <div class="qr-box show" id="qb-xrp"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-xrp"></div>
-    <div class="addr" id="a-xrp">rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k</div>
-    <div class="btns"><button class="btn btn-qr on" onclick="tog('xrp',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-xrp')">Copy</button></div>
+  <div class="container">
+    <h1>Support QRTP-4</h1>
+    <p class="sub">Help us build the future of QR Token Passports</p>
+    
+    <div class="card main">
+      <div class="section-title">XRP Donation</div>
+      <div class="qr-wrap">
+        <div class="qr-frame">
+          <canvas id="qr-xrp"></canvas>
+          <div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div>
+        </div>
+        <div class="qr-label">QRTP-4 XRP Wallet</div>
+      </div>
+      <div class="row">
+        <div class="row-info">
+          <div class="title">XRP (Ripple)</div>
+          <div class="addr" id="a-xrp">rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k</div>
+        </div>
+        <button class="btn" onclick="cp('a-xrp')">Copy</button>
+      </div>
+    </div>
+    
+    <div class="other">
+      <div class="section-title">Other Crypto</div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">Bitcoin (BTC)</div>
+          <div class="addr" id="a-btc">1GU91ELtz57HuafaDLackXM8TWxHixXeBx</div>
+        </div>
+        <button class="btn" onclick="cp('a-btc')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">ETH / ERC20</div>
+          <div class="net">Ethereum Network</div>
+          <div class="addr" id="a-eth">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn" onclick="cp('a-eth')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">BNB / BEP20</div>
+          <div class="net">Binance Smart Chain</div>
+          <div class="addr" id="a-bnb">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn" onclick="cp('a-bnb')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">USDT TRC20</div>
+          <div class="net">Tron Network</div>
+          <div class="addr" id="a-usdt-trc">TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY</div>
+        </div>
+        <button class="btn" onclick="cp('a-usdt-trc')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">USDT BEP20</div>
+          <div class="net">Binance Smart Chain</div>
+          <div class="addr" id="a-usdt-bep">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn" onclick="cp('a-usdt-bep')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">USDC POL</div>
+          <div class="net">Polygon Network</div>
+          <div class="addr" id="a-usdc-pol">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
+        </div>
+        <button class="btn" onclick="cp('a-usdc-pol')">Copy</button>
+      </div>
+      
+      <div class="crypto-row">
+        <div class="row-info">
+          <div class="title">Solana (SOL)</div>
+          <div class="net">Solana Network</div>
+          <div class="addr" id="a-sol">G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd</div>
+        </div>
+        <button class="btn" onclick="cp('a-sol')">Copy</button>
+      </div>
+    </div>
+    
+    <div class="footer">QRTP-4 - No Passport = No Trust<br><a href="index.html">Back to Main</a></div>
   </div>
-
-  <div class="card" id="w-btc">
-    <div class="title">Bitcoin (BTC)</div>
-    <div class="net">Bitcoin Network</div>
-    <div class="qr-box" id="qb-btc"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-btc"></div>
-    <div class="addr" id="a-btc">1GU9iELtz57HuafaDLackXM8TWxHixXeBx</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('btc',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-btc')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-eth">
-    <div class="title">ETH / ERC20</div>
-    <div class="net">Ethereum Network</div>
-    <div class="qr-box" id="qb-eth"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-eth"></div>
-    <div class="addr" id="a-eth">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('eth',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-eth')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-bnb">
-    <div class="title">BNB / BEP20</div>
-    <div class="net">Binance Smart Chain</div>
-    <div class="qr-box" id="qb-bnb"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-bnb"></div>
-    <div class="addr" id="a-bnb">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('bnb',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-bnb')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-usdt-trc">
-    <div class="title">USDT TRC20</div>
-    <div class="net">Tron Network</div>
-    <div class="qr-box" id="qb-usdt-trc"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-usdt-trc"></div>
-    <div class="addr" id="a-usdt-trc">TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('usdt-trc',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-usdt-trc')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-usdt-bep">
-    <div class="title">USDT BEP20</div>
-    <div class="net">Binance Smart Chain</div>
-    <div class="qr-box" id="qb-usdt-bep"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-usdt-bep"></div>
-    <div class="addr" id="a-usdt-bep">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('usdt-bep',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-usdt-bep')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-usdc-pol">
-    <div class="title">USDC POL</div>
-    <div class="net">Polygon Network</div>
-    <div class="qr-box" id="qb-usdc-pol"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-usdc-pol"></div>
-    <div class="addr" id="a-usdc-pol">0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('usdc-pol',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-usdc-pol')">Copy</button></div>
-  </div>
-
-  <div class="card" id="w-sol">
-    <div class="title">Solana (SOL)</div>
-    <div class="net">Solana Network</div>
-    <div class="qr-box" id="qb-sol"><div class="corners"><div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div></div><img id="qi-sol"></div>
-    <div class="addr" id="a-sol">G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd</div>
-    <div class="btns"><button class="btn btn-qr" onclick="tog('sol',this)">QRTP-4</button><button class="btn btn-copy" onclick="cp('a-sol')">Copy</button></div>
-  </div>
-
-  <div class="footer">QRTP-4 - No Passport = No Trust<br><a href="index.html">Verifier</a> | <a href="issue.html">Issuer</a> | <a href="https://github.com/qrtp4/QRTP-4">GitHub</a></div>
-</div>
-<div class="toast" id="toast">Copied!</div>
-<script>
-const ids=['xrp','btc','eth','bnb','usdt-trc','usdt-bep','usdc-pol','sol'];
-function cp(id){navigator.clipboard.writeText(document.getElementById(id).textContent);const t=document.getElementById('toast');t.style.display='block';setTimeout(()=>t.style.display='none',1500)}
-function tog(id,btn){const b=document.getElementById('qb-'+id);const s=b.classList.toggle('show');btn.classList.toggle('on',s)}
-window.onload=function(){ids.forEach(id=>{const addr=document.getElementById('a-'+id).textContent;QRCode.toDataURL(addr,{width:200,margin:1},function(err,url){if(!err)document.getElementById('qi-'+id).src=url})})};
-</script>
+  
+  <div class="toast" id="toast">Copied!</div>
+  
+  <script>
+    function cp(id){
+      navigator.clipboard.writeText(document.getElementById(id).textContent);
+      const t=document.getElementById('toast');
+      t.style.display='block';
+      setTimeout(()=>t.style.display='none',1500);
+    }
+    window.onload=function(){
+      const xrpAddr=document.getElementById('a-xrp').textContent;
+      QRCode.toCanvas(document.getElementById('qr-xrp'),xrpAddr,{width:180,margin:2,color:{dark:'#000',light:'#fff'}});
+    };
+  </script>
 </body>
 </html>

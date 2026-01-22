@@ -6,6 +6,34 @@ Identity • Verification • Anti-Fake • Trust Layer
 ![Views](https://komarev.com/ghpvc/?username=qrtp4&label=Profile%20Views&color=blue&style=flat)
 ![GitHub stars](https://img.shields.io/github/stars/qrtp4/QRTP-4?style=social)
 
+
+---
+
+## ⚡ Quick Start (Issue → Verify)
+
+### 1) Install issuer dependencies
+```bash
+cd issuer
+npm install
+```
+
+### 2) Issue a passport (creates QR + updates registry)
+```bash
+node issue.js wallet "xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k" "XRP (Primary)"
+```
+
+### 3) Open the Verifier (GitHub Pages)
+[https://qrtp4.github.io/QRTP-4/](https://qrtp4.github.io/QRTP-4/)
+
+### 4) Scan the generated QR
+Scan `issuer/out/<pid>.png` with your camera → get ✅ VERIFIED.
+
+### 5) Revoke a passport (optional)
+```bash
+node revoke.js <pid>
+```
+
+> **No Passport = No Trust.**
 > **No Passport = No Trust.**
 
 ---
@@ -23,19 +51,6 @@ a unique identity layer that protects authenticity, origin, and trust.
 - ✅ Authenticity validation
 - ✅ Anti-fake protection layer
 - ✅ Registry logic and proof levels
-
----
-
-## 🚀 Quick Start (Issue → Verify)
-
-```bash
-1. Go to: https://qrtp4.github.io/QRTP-4/issuer/
-2. Fill: name, symbol, chain, contract
-3. Click "Generate Passport" → get QR + JSON
-4. Open: https://qrtp4.github.io/QRTP-4/verifier/
-5. Scan QR or paste JSON → see status
-6. Done. Token verified in <2 min.
-```
 
 ---
 

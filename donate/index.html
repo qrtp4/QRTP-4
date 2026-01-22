@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QRTP-4 Donate</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui,sans-serif;background:#0b1220;color:#dbe7ff;min-height:100vh;padding:24px 16px}
+    .wrap{max-width:720px;margin:0 auto}
+    h1{color:#58a6ff;text-align:center;margin-bottom:8px;font-size:28px}
+    .sub{color:#8b949e;text-align:center;margin-bottom:24px}
+    .section{color:#58a6ff;font-size:18px;margin:20px 0 12px}
+    .card{background:#0f1a2e;border:1px solid #1f2a44;border-radius:12px;padding:14px;margin-bottom:10px}
+    .card.main{border:2px solid #58a6ff}
+    .row{display:flex;align-items:center;gap:12px}
+    .info{flex:1;min-width:0}
+    .title{font-weight:600;font-size:15px}
+    .net{color:#6e7681;font-size:11px}
+    .addr{font-family:ui-monospace,monospace;font-size:10px;color:#8b949e;word-break:break-all;margin-top:4px}
+    .btns{display:flex;gap:8px}
+    .btn{border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer}
+    .btn-link{background:#1e7f3a;color:#fff}
+    .btn-link:hover{background:#2ea043}
+    .btn-qr{background:#203155;color:#58a6ff;border:1px solid #2b3a62}
+    .btn-qr:hover{background:#2b3a62}
+    .footer{margin-top:32px;text-align:center;color:#6e7681;font-size:13px}
+    .footer a{color:#58a6ff;text-decoration:none}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e7f3a;color:#fff;padding:12px 24px;border-radius:8px;display:none;z-index:100}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Support QRTP-4</h1>
+    <p class="sub">Help us build the future of QR Token Passports</p>
+    <div id="wallets"></div>
+    <div class="footer">QRTP-4 — No Passport = No Trust<br><a href="../index.html">Back to Main</a></div>
+  </div>
+  <div class="toast" id="toast">Copied!</div>
+
+<script>
+  async function copyText(txt, btn) {
+    await navigator.clipboard.writeText(txt);
+    const old = btn.textContent;
+    btn.textContent = "Copied";
+    setTimeout(() => btn.textContent = old, 900);
+  }
+
+  function openWalletQR(id) {
+    window.open(`./qr.html?id=${encodeURIComponent(id)}`, "_blank", "noopener,noreferrer");
+  }
+
+  async function loadWallets() {
+    const res = await fetch("./wallets.json", { cache: "no-store" });
+    return await res.json();
+  }
+
+  async function render() {
+    const wallets = await loadWallets();
+    const container = document.getElementById("wallets");
+    
+    // Group by main (XRP) and others
+    const xrp = wallets.find(w => w.id === "xrp");
+    const others = wallets.filter(w => w.id !== "xrp");
+    
+    let html = '';
+    
+    // Main XRP card
+    if (xrp) {
+      html += `
+        <div class="section">XRP Donation</div>
+        <div class="card main">
+          <div class="row">
+            <div class="info">
+              <div class="title">${xrp.title}</div>
+              <div class="addr">${xrp.address}</div>
+            </div>
+            <div class="btns">
+              <button class="btn btn-link" onclick="copyText('${xrp.address}', this)">Link</button>
+              <button class="btn btn-qr" onclick="openWalletQR('${xrp.id}')">QRTP-4</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Other crypto
+    if (others.length > 0) {
+      html += `<div class="section">Other Crypto</div>`;
+      others.forEach(w => {
+        html += `
+          <div class="card">
+            <div class="row">
+              <div class="info">
+                <div class="title">${w.title}</div>
+                ${w.network ? `<div class="net">${w.network}</div>` : ''}
+                <div class="addr">${w.address}</div>
+              </div>
+              <div class="btns">
+                <button class="btn btn-link" onclick="copyText('${w.address}', this)">Link</button>
+                <button class="btn btn-qr" onclick="openWalletQR('${w.id}')">QRTP-4</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    
+    container.innerHTML = html;
+  }
+  
+  render();
+</script>
+</body>
+</html>

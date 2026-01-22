@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QRTP-4 Verifier</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    textarea { width: 100%; height: 140px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    button { padding: 10px 14px; cursor: pointer; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+    .ok { font-weight: 700; }
+    .small { color: #555; font-size: 14px; }
+    code { background: #f6f6f6; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>QRTP-4 Verifier</h1>
+  <p class="small">Paste QR content (the JSON envelope) and verify signature + registry status.</p>
+
+  <div class="card">
+    <label for="qr">QR Content</label>
+    <textarea id="qr" placeholder='{"t":"QRTP4","v":"0.1","p":"...","s":"..."}'></textarea>
+    <div class="row">
+      <button id="verifyBtn">Verify</button>
+      <button id="loadBtn">Reload Registry</button>
+    </div>
+  </div>
+
+  <div id="result" class="card"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <script src="./verifier.js"></script>
+</body>
+</html>

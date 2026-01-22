@@ -3,54 +3,54 @@
     "id": "xrp",
     "title": "XRP (Ripple)",
     "address": "rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k",
-    "qrImg": "./qr/xrp.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k"
   },
   {
     "id": "btc",
     "title": "Bitcoin (BTC)",
     "address": "1GU91ELtz57HuafaDLackXM8TWxHixXeBx",
-    "qrImg": "./qr/btc.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=1GU91ELtz57HuafaDLackXM8TWxHixXeBx"
   },
   {
     "id": "eth",
     "title": "ETH / ERC20",
     "network": "Ethereum Network",
     "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
-    "qrImg": "./qr/eth.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2"
   },
   {
     "id": "bnb",
     "title": "BNB / BEP20",
     "network": "Binance Smart Chain",
     "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
-    "qrImg": "./qr/bnb.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2"
   },
   {
     "id": "usdt-trc",
     "title": "USDT TRC20",
     "network": "Tron Network",
     "address": "TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY",
-    "qrImg": "./qr/usdt-trc.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=TF6sqrZA5FXQCUtvsuL4yuztr8wU9nkcnY"
   },
   {
     "id": "usdt-bep",
     "title": "USDT BEP20",
     "network": "Binance Smart Chain",
     "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
-    "qrImg": "./qr/usdt-bep.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2"
   },
   {
     "id": "usdc-pol",
     "title": "USDC POL",
     "network": "Polygon Network",
     "address": "0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2",
-    "qrImg": "./qr/usdc-pol.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=0x2c0c312b8e1a3e1f7ddaca1bb1fcd1b08e0c24a2"
   },
   {
     "id": "sol",
     "title": "Solana (SOL)",
     "network": "Solana Network",
     "address": "G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd",
-    "qrImg": "./qr/sol.png"
+    "qrImg": "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=G1HNSDB2n4C9SPzMyYpVzMtc9n8KbbiwbVdJTSPDYLRd"
   }
 ]

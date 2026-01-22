@@ -14,7 +14,7 @@
     .net{color:#6e7681;font-size:12px;margin-bottom:8px}
     .addr{font-family:ui-monospace, Menlo, monospace;background:#0b1220;border:1px solid #263453;border-radius:12px;padding:10px;word-break:break-all;font-size:12px}
     .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
     .copy{background:#1e7f3a;color:white}
     .copy:hover{background:#2ea043}
     .back{background:#203155;color:#dbe7ff;border:1px solid #2b3a62}
@@ -30,7 +30,7 @@
       <div class="addr" id="addr"></div>
       <div class="row">
         <button class="btn copy" id="copyBtn">Copy address</button>
-        <button class="btn back" onclick="history.back()">Back</button>
+        <a class="btn back" href="./index.html">Back</a>
       </div>
     </div>
   </div>

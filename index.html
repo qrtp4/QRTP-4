@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QRTP-4 Verifier</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { color: #58a6ff; margin-bottom: 8px; }
+    .subtitle { color: #8b949e; margin-bottom: 24px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    textarea { width: 100%; height: 100px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; padding: 12px; font-family: monospace; font-size: 12px; resize: vertical; }
+    .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-top: 12px; }
+    .btn-primary { background: #238636; color: #fff; }
+    .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn:hover { opacity: 0.9; }
+    .result { margin-top: 16px; }
+    .ok { color: #3fb950; font-weight: 700; }
+    .warn { color: #d29922; font-weight: 700; }
+    .fail { color: #f85149; font-weight: 700; }
+    .info { margin-top: 12px; }
+    .info div { padding: 4px 0; }
+    .info b { color: #8b949e; }
+    code { background: #0d1117; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
+    .auto-msg { background: #1f6feb22; border: 1px solid #1f6feb; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QRTP-4 Verifier</h1>
+    <p class="subtitle">Passport verification for tokens, products & documents</p>
+    
+    <div id="autoResult"></div>
+    
+    <div class="card">
+      <label>QR Content (JSON envelope):</label>
+      <textarea id="qr" placeholder='{"t":"QRTP4","v":"0.1","p":"...","s":"..."}'></textarea>
+      <button class="btn btn-primary" id="verifyBtn">Verify</button>
+      <button class="btn btn-secondary" id="loadBtn">Reload Registry</button>
+    </div>
+    
+    <div id="result" class="card result" style="display:none;"></div>
+    
+    <p class="subtitle" style="margin-top:24px;font-size:12px;">QRTP-4 Protocol v0.1 | No Passport = No Trust</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    let issuers = {}, registry = {};
+    
+    function b64urlToBytes(s) {
+      const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - (s.length % 4));
+      const b64 = s.replaceAll('-', '+').replaceAll('_', '/') + pad;
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    }
+    
+    async function loadData() {
+      try {
+        issuers = await (await fetch('./verifier/issuers.json', { cache: 'no-store' })).json();
+        registry = await (await fetch('./verifier/registry.json', { cache: 'no-store' })).json();
+        return true;
+      } catch (e) { console.error('Failed to load registry:', e); return false; }
+    }
+    
+    function verifyEnvelope(envelope) {
+      if (!envelope || envelope.t !== 'QRTP4' || envelope.v !== '0.1') return { ok: false, reason: 'Invalid envelope' };
+      if (typeof envelope.p !== 'string' || typeof envelope.s !== 'string') return { ok: false, reason: 'Missing payload/signature' };
+      const payloadBytes = b64urlToBytes(envelope.p);
+      const sigBytes = b64urlToBytes(envelope.s);
+      let payload;
+      try { payload = JSON.parse(new TextDecoder().decode(payloadBytes)); }
+      catch { return { ok: false, reason: 'Invalid payload JSON' }; }
+      if (!payload.pid || !payload.iss) return { ok: false, reason: 'Missing required fields' };
+      const pubB64u = issuers[payload.iss];
+      if (!pubB64u || pubB64u === 'REPLACE_AFTER_FIRST_ISSUE') return { ok: false, reason: 'Unknown issuer: ' + payload.iss };
+      const pubKey = b64urlToBytes(pubB64u);
+      const sigOk = nacl.sign.detached.verify(payloadBytes, sigBytes, pubKey);
+      return { ok: sigOk, reason: sigOk ? 'Signature valid' : 'Signature invalid', payload };
+    }
+    
+    function render(env) {
+      const v = verifyEnvelope(env);
+      const st = registry[v.payload?.pid] || { exists: false, status: 'unknown' };
+      let badge, statusText;
+      if (!v.ok) { badge = 'fail'; statusText = v.reason; }
+      else if (!st.pid) { badge = 'warn'; statusText = 'Signature OK, PID not in registry'; }
+      else if (st.status === 'issued') { badge = 'ok'; statusText = 'VERIFIED (issued)'; }
+      else { badge = 'fail'; statusText = 'REVOKED/SUSPENDED'; }
+      $('result').style.display = 'block';
+      $('result').innerHTML = `
+        <div class="${badge}">${badge === 'ok' ? '✅' : badge === 'warn' ? '⚠️' : '❌'} ${statusText}</div>
+        ${v.ok ? `<div class="info">
+          <div><b>PID:</b> <code>${v.payload.pid}</code></div>
+          <div><b>Issuer:</b> <code>${v.payload.iss}</code></div>
+          <div><b>Type:</b> <code>${v.payload.typ || '-'}</code></div>
+          <div><b>Ref:</b> <code>${v.payload.ref || '-'}</code></div>
+          <div><b>Status:</b> <code>${st.status || 'unknown'}</code></div>
+        </div>` : ''}
+      `;
+    }
+    
+    async function main() {
+      await loadData();
+      const hash = location.hash.slice(1);
+      if (hash) {
+        $('autoResult').innerHTML = '<div class="auto-msg">Auto-verifying from URL...</div>';
+        try {
+          const env = JSON.parse(decodeURIComponent(hash));
+          $('qr').value = JSON.stringify(env);
+          render(env);
+          $('autoResult').innerHTML = '';
+        } catch { $('autoResult').innerHTML = '<div class="auto-msg" style="border-color:#f85149;background:#f8514922;">Failed to parse URL token</div>'; }
+      }
+      $('verifyBtn').onclick = () => {
+        try { render(JSON.parse($('qr').value.trim())); }
+        catch { $('result').style.display = 'block'; $('result').innerHTML = '<div class="fail">❌ Invalid JSON</div>'; }
+      };
+      $('loadBtn').onclick = async () => { await loadData(); alert('Registry reloaded'); };
+    }
+    main();
+  </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QRTP-4 Donate & Support</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+    .container { max-width: 600px; width: 100%; }
+    h1 { color: #58a6ff; margin-bottom: 8px; text-align: center; }
+    .subtitle { color: #8b949e; margin-bottom: 32px; text-align: center; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .card-title { color: #58a6ff; font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .crypto-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0d1117; border-radius: 8px; margin-bottom: 12px; }
+    .crypto-name { font-weight: 600; color: #c9d1d9; }
+    .crypto-address { font-family: monospace; font-size: 12px; color: #8b949e; word-break: break-all; max-width: 300px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn-copy { background: #238636; color: #fff; font-size: 12px; }
+    .btn-primary { background: #238636; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
+    .btn-sponsor { background: #bf3989; color: #fff; width: 100%; padding: 14px; font-size: 16px; }
+    .tier { border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s; }
+    .tier:hover { border-color: #58a6ff; }
+    .tier.selected { border-color: #238636; background: #0d1117; }
+    .tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .tier-name { font-weight: 600; color: #c9d1d9; }
+    .tier-price { color: #238636; font-weight: 700; }
+    .tier-desc { color: #8b949e; font-size: 14px; }
+    .qr-container { text-align: center; padding: 20px; }
+    .qr-container canvas { background: #fff; padding: 16px; border-radius: 8px; }
+    .footer { margin-top: 40px; text-align: center; color: #8b949e; font-size: 14px; }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #238636; color: #fff; padding: 12px 24px; border-radius: 8px; display: none; z-index: 1000; }
+    .links { display: flex; gap: 16px; justify-content: center; margin-top: 16px; }
+    .links a { color: #58a6ff; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Support QRTP-4</h1>
+    <p class="subtitle">Help us build the future of QR Token Passports</p>
+
+    <!-- Crypto Donations -->
+    <div class="card">
+      <div class="card-title">Crypto Donations</div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">Bitcoin (BTC)</div>
+          <div class="crypto-address" id="btc-addr">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('btc-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">Ethereum (ETH)</div>
+          <div class="crypto-address" id="eth-addr">0x742d35Cc6634C0532925a3b844Bc9e7595f2bD38</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('eth-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">USDT (TRC20)</div>
+          <div class="crypto-address" id="usdt-addr">TJYvGxk9Z3p3K8FYhWvRYJfZDqcTVCZAbe</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('usdt-addr')">Copy</button>
+      </div>
+      
+      <div class="crypto-item">
+        <div>
+          <div class="crypto-name">Solana (SOL)</div>
+          <div class="crypto-address" id="sol-addr">9WzDXwBbmPXUvFSvRiiGerJgRFMcLQF3fDNpYHxVBz4c</div>
+        </div>
+        <button class="btn btn-copy" onclick="copyAddr('sol-addr')">Copy</button>
+      </div>
+    </div>
+
+    <!-- Sponsorship Tiers -->
+    <div class="card">
+      <div class="card-title">Sponsorship Tiers</div>
+      
+      <div class="tier" onclick="selectTier(this, 5)">
+        <div class="tier-header">
+          <span class="tier-name">Supporter</span>
+          <span class="tier-price">$5/month</span>
+        </div>
+        <p class="tier-desc">Your name in our supporters list</p>
+      </div>
+      
+      <div class="tier" onclick="selectTier(this, 15)">
+        <div class="tier-header">
+          <span class="tier-name">Backer</span>
+          <span class="tier-price">$15/month</span>
+        </div>
+        <p class="tier-desc">Early access to new features + Supporter perks</p>
+      </div>
+      
+      <div class="tier" onclick="selectTier(this, 50)">
+        <div class="tier-header">
+          <span class="tier-name">Sponsor</span>
+          <span class="tier-price">$50/month</span>
+        </div>
+        <p class="tier-desc">Logo on README + Priority support + All perks</p>
+      </div>
+      
+      <a href="https://github.com/sponsors/qrtp4" target="_blank" style="text-decoration: none;">
+        <button class="btn btn-sponsor">Become a GitHub Sponsor</button>
+      </a>
+    </div>
+
+    <!-- One-time Donation -->
+    <div class="card">
+      <div class="card-title">One-time Donation</div>
+      <p style="color: #8b949e; margin-bottom: 16px;">Support with a custom amount</p>
+      
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(10)">$10</button>
+        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(25)">$25</button>
+        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(50)">$50</button>
+        <button class="btn" style="background: #21262d; color: #c9d1d9; flex: 1;" onclick="setAmount(100)">$100</button>
+      </div>
+      
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 16px;">
+        <span style="color: #8b949e;">$</span>
+        <input type="number" id="customAmount" value="25" min="1" style="flex: 1; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; font-size: 16px;" />
+      </div>
+      
+      <a href="https://ko-fi.com/qrtp4" target="_blank" style="text-decoration: none;">
+        <button class="btn btn-primary">Donate via Ko-fi</button>
+      </a>
+    </div>
+
+    <!-- QR Code for quick payment -->
+    <div class="card">
+      <div class="card-title">Quick Pay QR</div>
+      <div class="qr-container">
+        <canvas id="qrCanvas"></canvas>
+        <p style="color: #8b949e; margin-top: 12px; font-size: 14px;">Scan to donate ETH</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>QRTP-4 — No Passport = No Trust</p>
+      <div class="links">
+        <a href="https://github.com/qrtp4/QRTP-4">GitHub</a>
+        <a href="index.html">Verifier</a>
+        <a href="issue.html">Issuer</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    // Copy address to clipboard
+    function copyAddr(id) {
+      const addr = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(addr);
+      showToast('Address copied!');
+    }
+
+    // Select sponsorship tier
+    function selectTier(el, amount) {
+      document.querySelectorAll('.tier').forEach(t => t.classList.remove('selected'));
+      el.classList.add('selected');
+      showToast('Selected $' + amount + '/month tier');
+    }
+
+    // Set custom amount
+    function setAmount(val) {
+      document.getElementById('customAmount').value = val;
+    }
+
+    // Show toast notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 2000);
+    }
+
+    // Generate QR code for ETH address
+    window.onload = function() {
+      const ethAddr = document.getElementById('eth-addr').textContent;
+      QRCode.toCanvas(document.getElementById('qrCanvas'), 'ethereum:' + ethAddr, {
+        width: 200,
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+    };
+  </script>
+</body>
+</html>

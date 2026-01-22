@@ -27,8 +27,8 @@ function render(html) {
 }
 
 function okBadge(txt) { return `<span class="ok">OK ${txt}</span>`; }
-function warnBadge(txt) { return `<span class="ok">WARN ${txt}</span>`; }
-function badBadge(txt) { return `<span class="ok">FAIL ${txt}</span>`; }
+function warnBadge(txt) { return `<span class="warn">WARN ${txt}</span>`; }
+function badBadge(txt) { return `<span class="fail">FAIL ${txt}</span>`; }
 
 function verifyEnvelope(envelope) {
   if (!envelope || envelope.t !== "QRTP4" || envelope.v !== "0.1") {

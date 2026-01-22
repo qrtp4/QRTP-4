@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>QRTP-4 Wallet QR</title>
+  <style>
+    body{margin:0;background:#0b1220;color:#dbe7ff;font-family:system-ui}
+    .wrap{max-width:720px;margin:0 auto;padding:24px 16px}
+    .card{background:#0f1a2e;border:1px solid #1f2a44;border-radius:16px;padding:16px}
+    .qr{display:grid;place-items:center;background:#0b1220;border:2px solid #2b3a62;border-radius:16px;padding:14px}
+    .qr img{max-width:420px;width:100%;border-radius:12px}
+    .title{font-size:22px;margin:14px 0 8px}
+    .net{color:#6e7681;font-size:12px;margin-bottom:8px}
+    .addr{font-family:ui-monospace, Menlo, monospace;background:#0b1220;border:1px solid #263453;border-radius:12px;padding:10px;word-break:break-all;font-size:12px}
+    .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+    .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .copy{background:#1e7f3a;color:white}
+    .copy:hover{background:#2ea043}
+    .back{background:#203155;color:#dbe7ff;border:1px solid #2b3a62}
+    .back:hover{background:#2b3a62}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="qr"><img id="qrImg" alt="QR"/></div>
+      <div class="title" id="title"></div>
+      <div class="net" id="net"></div>
+      <div class="addr" id="addr"></div>
+      <div class="row">
+        <button class="btn copy" id="copyBtn">Copy address</button>
+        <button class="btn back" onclick="history.back()">Back</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  async function loadWallets() {
+    const res = await fetch("./wallets.json", { cache: "no-store" });
+    return await res.json();
+  }
+
+  function getId() {
+    return new URLSearchParams(location.search).get("id");
+  }
+
+  async function main(){
+    const id = getId();
+    const wallets = await loadWallets();
+    const w = wallets.find(x => x.id === id);
+
+    if(!w){
+      document.getElementById("title").textContent = "Wallet not found";
+      return;
+    }
+
+    document.title = w.title + " — QRTP-4";
+    document.getElementById("title").textContent = w.title;
+    document.getElementById("addr").textContent = w.address;
+    document.getElementById("qrImg").src = w.qrImg;
+    
+    if(w.network) {
+      document.getElementById("net").textContent = w.network;
+    }
+
+    document.getElementById("copyBtn").onclick = async () => {
+      await navigator.clipboard.writeText(w.address);
+      const btn = document.getElementById("copyBtn");
+      const old = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(()=> btn.textContent = old, 900);
+    };
+  }
+  main();
+</script>
+</body>
+</html>

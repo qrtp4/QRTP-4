@@ -221,12 +221,16 @@
       const btn =
         document.querySelector("#btnVerify") ||
         document.querySelector("button#verify") ||
+
+        
         [...document.querySelectorAll("button")].find(b => /verify/i.test(b.textContent || ""));
       if (btn) btn.click();
     } catch (e) {
       console.warn("Auto-verify failed:", e);
     }
   });
-</script>
+
+/* ========================= QRTP-4 MARK-L3 (Live + Deterministic) seed = SHA256(pid|timeStep|cornerId) interval = 700ms ========================= */ const MARKL3 = { intervalMs: 700, alph: "ABCDEFGHJKLMNPQRSTUVWXYZ", sym: "+-*/=$#@!?%&<>", act: "▷▶→»»" }; function hexToBytes(hex){ const out = new Uint8Array(hex.length/2); for(let i=0;i<out.length;i++){ out[i] = parseInt(hex.slice(i*2, i*2+2), 16); } return out; } async function sha256Hex(str){ const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)); return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join(""); } function pick(set, hex, offset){ const v = parseInt(hex.slice(offset, offset+2), 16); return set[v % set.length]; } async function computeMarkL3(pid, timeStep){ const sTL = await sha256Hex(`${pid}|${timeStep}|TL`); const sTR = await sha256Hex(`${pid}|${timeStep}|TR`); const sBL = await sha256Hex(`${pid}|${timeStep}|BL`); const sBR = await sha256Hex(`${pid}|${timeStep}|BR`); const tl = pick(MARKL3.alph, sTL, 0) + pick(MARKL3.alph, sTL, 2) + pick(MARKL3.alph, sTL, 4); const tr = pick(MARKL3.sym, sTR, 0) + pick(MARKL3.sym, sTR, 2); const n = (parseInt(sBL.slice(0,4), 16) % 999) + 1; const bl = String(n).padStart(3, "0"); const br = pick(MARKL3.act, sBR, 0) + pick(MARKL3.act, sBR, 2); return { tl, tr, bl, br, step: timeStep }; } function renderMarkL3(symbols){ const tlEl = document.getElementById("mark-tl"); const trEl = document.getElementById("mark-tr"); const blEl = document.getElementById("mark-bl"); const brEl = document.getElementById("mark-br"); if(tlEl) tlEl.textContent = symbols.tl; if(trEl) trEl.textContent = symbols.tr; if(blEl) blEl.textContent = symbols.bl; if(brEl) brEl.textContent = symbols.br; const markStatus = document.querySelector("#mark-status, [data-mark-status]"); if(markStatus) markStatus.textContent = `MARK-L3 LIVE • step=${symbols.step}`; } function startMarkL3(env){ if(!env || !env.pid) return; if(window.__markL3Timer) clearInterval(window.__markL3Timer); const tick = async ()=>{ const timeStep = Math.floor(Date.now() / MARKL3.intervalMs); const symbols = await computeMarkL3(env.pid, timeStep); renderMarkL3(symbols); }; tick(); window.__markL3Timer = setInterval(tick, MARKL3.intervalMs); } window.__startMarkL3 = startMarkL3;
+  </script>
 </body>
 </html>

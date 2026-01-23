@@ -4,9 +4,10 @@ QRTP-4 is a passport-layer trust protocol for wallets, assets, and documents.
 
 It provides:
 - **Cryptographic authenticity (Ed25519 signatures)**
+- - **Scan-safe visual recognition layer ([QRTP-4 Mark](./MARK.md))**
 - **Public verification (GitHub Pages portal)**
 - **Registry status control (issued / suspended / revoked)**
-- **Scan-safe visual recognition layer (QRTP-4 Mark)**
+- [](url)
 
 **No Passport = No Trust.**
 

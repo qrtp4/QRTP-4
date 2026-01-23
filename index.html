@@ -25,13 +25,12 @@
     .bl { bottom:22px; left:22px; }
     .br { bottom:22px; right:22px; }
     
-    .center { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:150px; height:150px; display:grid; place-items:center; }
-    .seal { width:150px; height:150px; border-radius:999px; border:1px solid rgba(90,170,255,0.75); background:rgba(0,0,0,0.55); box-shadow:0 0 0 1px rgba(255,255,255,0.10) inset, 0 0 34px rgba(70,150,255,0.18); display:grid; place-items:center; animation:pulseSeal 2.6s ease-in-out infinite; }
-    .glyph { font-size:48px; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.5)); }
-    .pulse { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); font-family:ui-monospace,monospace; font-size:12px; color:rgba(255,255,255,0.70); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.10); background:rgba(0,0,0,0.35); white-space:nowrap; }
-    
-    @keyframes pulseSeal { 0%,100%{transform:scale(1)} 50%{transform:scale(1.035)} }
-    
+    .center { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; display:grid; place-items:center; pointer-events:none; }
+    .core-ring { width:160px; height:160px; border-radius:999px; border:1.5px solid rgba(120,180,255,0.75); display:grid; place-items:center; background: radial-gradient(circle at center, rgba(255,255,255,0.08), rgba(0,0,0,0.6)); box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 38px rgba(80,160,255,0.35); animation:corePulse 3.2s ease-in-out infinite; }
+    .core-glow { position:absolute; width:120px; height:120px; border-radius:999px; background: radial-gradient(circle, rgba(120,180,255,0.35), transparent 70%); filter: blur(18px); }
+    .core-glyph { font-size:50px; font-weight:900; color:white; text-shadow: 0 6px 24px rgba(0,0,0,0.65); transition: transform 0.6s ease, opacity 0.6s ease; }
+    .core-label { position:absolute; bottom:-22px; font-size:12px; letter-spacing:0.12em; font-family: ui-monospace, monospace; color: rgba(255,255,255,0.7); padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.45); }
+    @keyframes corePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.045)} }    
     .card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; margin-top:24px; }
     label { display:block; margin-bottom:8px; color:#8b949e; font-size:14px; }
     textarea { width:100%; height:100px; background:#0d1117; border:1px solid #30363d; border-radius:8px; color:#c9d1d9; padding:12px; font-family:monospace; font-size:11px; resize:vertical; }
@@ -57,11 +56,13 @@
         <div class="live tr" id="liveTR">--</div>
         <div class="live bl" id="liveBL">--</div>
         <div class="live br" id="liveBR">--</div>
-        <div class="center">
-          <div class="seal">
-            <span class="glyph" id="centerGlyph"></span>
-          </div>
-          <div class="pulse" id="centerPulse">QRTP-4</div>
+              <div class="center">
+        <div class="core-ring">
+          <div class="core-glow"></div>
+          <div class="core-glyph" id="centerGlyph"></div>
+        </div>
+        <div class="core-label" id="centerLabel">QRTP-4 CORE</div>
+      </div>
         </div>
       </div>
     </div>
@@ -98,12 +99,12 @@
           physics: 'πρστφψωαβγδεζηθκλμνξυχΔΣΦΨΩπ±∞≈≠≤≥√∫∂∇∑∏⊕⊖⊗⊙⟨⟩'
     };
     
-    const GLYPHS = ['', '🔐', '💎', '💎', '⚡', '♣', '♦'];    const STEP_MS_CORNER = 500;
-    const STEP_MS_CENTER = 800;
+    const COREGLYPHS = ['⚡', '🔐', '💎', '♣', '♦'];    const STEP_MS_CORNER = 500;    const STEP_MS_CENTER = 800;
     
     const $ = id => document.getElementById(id);
     const qrCanvas = $('qr');
     const liveTL = $('liveTL'), liveTR = $('liveTR'), liveBL = $('liveBL'), liveBR = $('liveBR');
+        const centerGlyph = $('centerGlyph'), centerLabel = $('centerLabel');
     const qrInput = $('qrInput');
     const verifyBtn = $('verifyBtn'), loadBtn = $('loadBtn');
     const resultDiv = $('result'), statusDiv = $('status');
@@ -152,8 +153,7 @@
       const pre = new Uint8Array([...sigHash.slice(0, 16), ...utf8Bytes(timeStep + 'CENTER')]);
       const h = await sha256(pre);
       
-      const glyph = GLYPHS[h[0] % GLYPHS.length];
-      const tag = pickFromPool(h, 1, pool) + pickFromPool(h, 2, pool);
+      const glyph = COREGLYPHS[h[0] % COREGLYPHS.length];      const tag = pickFromPool(h, 1, pool) + pickFromPool(h, 2, pool);
       return { glyph, tag };
     }
     
@@ -185,6 +185,10 @@
         liveTR.textContent = tr;
         liveBL.textContent = bl;
         liveBR.textContent = br;
+        
+      const c = await centerState(sigHash, tC, mode);
+      centerGlyph.textContent = c.glyph;
+      centerLabel.textContent = 'QRTP-4 CORE';
         
       };
       

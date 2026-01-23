@@ -7,6 +7,7 @@
   <meta name="description" content="QRTP-4: cryptographic QR passports. Verify authenticity in seconds for tokens, products & documents." />
   <meta property="og:title" content="QRTP-4 — Global QR Passport Verifier" />
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tweetnacl-util@0.15.1/nacl-util.min.js"></script>
 <style>
   :root{--bg:#fff;--fg:#000;--b:2px solid #000;--r:16px}
   *{box-sizing:border-box}
@@ -116,15 +117,105 @@
     return JSON.parse(text);
   }
 
-  // COMMAND: run on load
-  window.addEventListener("load", () => {
+      // === ED25519 VERIFICATION + REGISTRY ===
+  let ISSUERS = null;
+  let REGISTRY = null;
+
+  async function fetchJSON(path) {
+    const r = await fetch(path, { cache: "no-store" });
+    if (!r.ok) throw new Error(`Fetch failed: ${path} (${r.status})`);
+    return r.json();
+  }
+
+  async function loadTrustData() {
     try {
+      ISSUERS = await fetchJSON("./verifier/issuers.json");
+      REGISTRY = await fetchJSON("./verifier/registry.json");
+    } catch (e) {
+      console.warn("Failed to load trust data:", e);
+      ISSUERS = {};
+      REGISTRY = {};
+    }
+  }
+
+  function b64ToBytes(b64) {
+    return nacl.util.decodeBase64(b64);
+  }
+
+  function buildCanonical(env) {
+    // MUST match issuer/issue-v1.js exactly
+    return `${env.v}|${env.iss}|${env.kid}|${env.pid}|${env.iat}|${env.exp}|${env.nonce}|${JSON.stringify(env.data || {})}`;
+  }
+
+  function verifySignature(env) {
+    if (!ISSUERS) throw new Error("ISSUERS not loaded");
+    const pubB64 = ISSUERS[env.kid];
+    if (!pubB64) return { ok: false, reason: "Unknown issuer key" };
+
+    const msg = nacl.util.decodeUTF8(buildCanonical(env));
+    const sig = b64ToBytes(env.sig);
+    const pub = b64ToBytes(pubB64);
+
+    const ok = nacl.sign.detached.verify(msg, sig, pub);
+    return ok ? { ok: true } : { ok: false, reason: "Invalid signature" };
+  }
+
+  function checkRegistry(env) {
+    if (!REGISTRY) throw new Error("REGISTRY not loaded");
+    const rec = REGISTRY[env.pid];
+    if (!rec) return { ok: false, status: "missing", reason: "PID not found" };
+
+    const st = (rec.status || "issued").toLowerCase();
+    if (st === "revoked") return { ok: false, status: "revoked", reason: "REVOKED" };
+    if (st === "suspended") return { ok: true, status: "suspended", reason: "SUSPENDED" };
+    return { ok: true, status: "issued", reason: "ISSUED" };
+  }
+
+  async function verifyAll(env) {
+    // 0) basic validation
+    if (!env || !env.v || !env.iss) return { level: "fail", text: "FAIL: invalid envelope" };
+    if (!env.sig || !env.kid || !env.pid) return { level: "fail", text: "FAIL: missing sig/kid/pid" };
+
+    // 1) signature
+    const s = verifySignature(env);
+    if (!s.ok) return { level: "fail", text: "FAIL: " + s.reason };
+
+    // 2) registry
+    const r = checkRegistry(env);
+    if (r.status === "revoked") return { level: "fail", text: "REVOKED" };
+    if (r.status === "suspended") return { level: "warn", text: "SUSPENDED (signature valid)" };
+
+    return { level: "ok", text: "VERIFIED ✅ (signature + registry)" };
+  }
+
+
+  // COMMAND: load trust data + run auto-verify on load
+  window.addEventListener("load", async () => {  window.addEventListener("load", () => {
+    try 
+          // Load trust data first
+      await loadTrustData();{
       const env = decodeEnvelopeFromHash();
       if (!env) return;
 
       // если у тебя есть textarea/input для JSON — заполни его
       const box = document.querySelector("textarea, #qrInput, #envelope, #payload");
       if (box) box.value = JSON.stringify(env, null, 2);
+      
+      // Run full verification
+      const result = await verifyAll(env);
+      
+      // Display result
+      const statusEl = document.getElementById("status");
+      const detailsEl = document.getElementById("details");
+      
+      if (statusEl) {
+        statusEl.textContent = "STATUS: " + result.text;
+        statusEl.className = result.level === "ok" ? "status-ok" : result.level === "warn" ? "status-warn" : "status-fail";
+      }
+      
+      if (detailsEl) {
+        detailsEl.textContent = JSON.stringify(env, null, 2);
+      }
 
       // если у тебя есть кнопка verify — нажми её программно
       const btn =

@@ -17,18 +17,14 @@ cd issuer
 npm install
 ```
 
-### 2) Issue a passport (creates QR + updates registry)
+### 2) Issue locally (creates signed envelope + QR)``
 ```bash
-node issue.js wallet "xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k" "XRP (Primary)"
-```
+cd issuer
+npm install`bash
+node issue-v1.js wallet xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k "XRP (Primary)"```
 
-### 3) Open the Verifier (GitHub Pages)
-[https://qrtp4.github.io/QRTP-4/](https://qrtp4.github.io/QRTP-4/)
-
-### 4) Scan the generated QR
-Scan `issuer/out/<pid>.png` with your camera → get ✅ VERIFIED.
-
-### 5) Revoke a passport (optional)
+### 3) Verify on the public portalOpen: [https://qrtp4.github.io/QRTP-4/](https://qrtp4.github.io/QRTP-4/)
+Paste the JSON envelope OR open the portal link embedded in the QR (auto-verify).
 ```bash
 node revoke.js <pid>
 ```

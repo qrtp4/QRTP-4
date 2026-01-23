@@ -1,220 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>QRTP-4 Verifier</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QRTP-4 — Global QR Passport Verifier</title>
+  <meta name="description" content="QRTP-4: cryptographic QR passports. Verify authenticity in seconds for tokens, products & documents." />
+  <meta property="og:title" content="QRTP-4 — Global QR Passport Verifier" />
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:system-ui,sans-serif; background:#0d1117; color:#c9d1d9; min-height:100vh; padding:20px; }
-    .container { max-width:600px; margin:0 auto; }
-    h1 { color:#58a6ff; margin-bottom:8px; text-align:center; }
-    .subtitle { color:#8b949e; margin-bottom:32px; text-align:center; }
-    
-    .scene { position:relative; width:100%; max-width:520px; aspect-ratio:1/1; margin:0 auto; display:grid; place-items:center; border-radius:18px; background:radial-gradient(600px 300px at 50% 0%, rgba(80,150,255,0.12), transparent 60%); border:1px solid rgba(255,255,255,0.12); overflow:hidden; }
-    
-    #qr { width:min(92%, 420px); height:min(92%, 420px); image-rendering:pixelated; background:#fff; border-radius:14px; box-shadow:0 18px 55px rgba(0,0,0,0.45); }
-    
-    .overlay { position:absolute; width:min(92%, 420px); height:min(92%, 420px); pointer-events:none; }
-    
-    .live { position:absolute; width:76px; height:76px; border-radius:14px; border:1px solid rgba(90,170,255,0.75); background:rgba(0,0,0,0.55); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:26px; letter-spacing:0.06em; box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 22px rgba(70,150,255,0.12); text-shadow:0 1px 0 rgba(0,0,0,0.55); }
-    .tl { top:22px; left:22px; }
-    .tr { top:22px; right:22px; }
-    .bl { bottom:22px; left:22px; }
-    .br { bottom:22px; right:22px; }
-    
-    .center { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; display:grid; place-items:center; pointer-events:none; }
-    .core-ring { width:160px; height:160px; border-radius:999px; border:1.5px solid rgba(120,180,255,0.75); display:grid; place-items:center; background: radial-gradient(circle at center, rgba(255,255,255,0.08), rgba(0,0,0,0.6)); box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 38px rgba(80,160,255,0.35); animation:corePulse 3.2s ease-in-out infinite; }
-    .core-glow { position:absolute; width:120px; height:120px; border-radius:999px; background: radial-gradient(circle, rgba(120,180,255,0.35), transparent 70%); filter: blur(18px); }
-    .core-glyph { font-size:50px; font-weight:900; color:white; text-shadow: 0 6px 24px rgba(0,0,0,0.65); transition: transform 0.6s ease, opacity 0.6s ease; }
-    .core-label { position:absolute; bottom:-22px; font-size:12px; letter-spacing:0.12em; font-family: ui-monospace, monospace; color: rgba(255,255,255,0.7); padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.45); }
-    @keyframes corePulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.045)} }    
-    .card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px; margin-top:24px; }
-    label { display:block; margin-bottom:8px; color:#8b949e; font-size:14px; }
-    textarea { width:100%; height:100px; background:#0d1117; border:1px solid #30363d; border-radius:8px; color:#c9d1d9; padding:12px; font-family:monospace; font-size:11px; resize:vertical; }
-    .btn { padding:12px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:600; margin-right:8px; margin-top:12px; }
-    .btn-primary { background:#238636; color:#fff; }
-    .btn-secondary { background:#21262d; color:#c9d1d9; border:1px solid #30363d; }
-    .result { margin-top:16px; padding:16px; border-radius:8px; display:none; }
-    .ok { background:#238636; color:#fff; }
-    .fail { background:#da3633; color:#fff; }
-    #status { font-family:monospace; font-size:12px; }
-    .footer { margin-top:24px; text-align:center; color:#8b949e; font-size:12px; }
+    :root{--bg:#fff;--fg:#000;--b:2px solid #000;--r:16px}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system}
+    .wrap{max-width:1020px;margin:0 auto;padding:24px 16px 60px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .seal{width:36px;height:36px;border:var(--b);border-radius:999px;display:grid;place-items:center;font-weight:900}
+    .btn{border:var(--b);border-radius:999px;padding:8px 12px;background:#fff;cursor:pointer;font-weight:700;font-size:12px}
+    .btn:hover{transform:translateY(-1px)}
+    .hero{margin:20px 0;border:var(--b);border-radius:var(--r);padding:18px}
+    h1{margin:0 0 8px;font-size:26px}
+    .sub{color:#666;font-size:14px}
+    .pill{border:var(--b);border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media (max-width:820px){.grid{grid-template-columns:1fr}}
+    .card{border:var(--b);border-radius:var(--r);padding:14px}
+    h2{margin:0 0 8px;font-size:14px;font-weight:900}
+    .k{font-size:12px;color:#666}
+    textarea{width:100%;min-height:120px;border:var(--b);border-radius:12px;padding:10px;font:11px monospace;resize:vertical}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .status{font-weight:900}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>QRTP-4 Verifier</h1>
-    <p class="subtitle">Secure Passport Verifier · Cryptographic Identity Verification</p>
-    
-    <div class="scene">
-      <canvas id="qr" width="360" height="360"></canvas>
-      <div class="overlay">
-        <div class="live tl" id="liveTL">--</div>
-        <div class="live tr" id="liveTR">--</div>
-        <div class="live bl" id="liveBL">--</div>
-        <div class="live br" id="liveBR">--</div>
-              <div class="center">
-        <div class="core-ring">
-          <div class="core-glow"></div>
-          <div class="core-glyph" id="centerGlyph"></div>
-        </div>
-        <div class="core-label" id="centerLabel">QRTP-4 CORE</div>
-      </div>
+  <div class="wrap">
+    <div class="top">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="seal">4</div>
+        <div>
+          <div style="font-weight:900;letter-spacing:.04em">QRTP-4</div>
+          <div class="k">Global QR Passport Verifier</div>
         </div>
       </div>
+      <button class="btn" onclick="scrollTo({top:0,behavior:'smooth'})">VERIFY NOW</button>
     </div>
-    
-    <div class="card">
-      <label>QR Content (JSON envelope):</label>
-        <textarea id="qrInput" placeholder='{"t":"QRTP4","v":"0.2","p":"...","s":"..."}'></textarea>      <button class="btn btn-primary" id="verifyBtn">Verify</button>
-      <button class="btn btn-secondary" id="loadBtn">Reload Registry</button>
-      <div id="result" class="result"></div>
-      <div id="status" style="margin-top:12px;"></div>
+
+    <div class="hero">
+      <h1>Signed QR Passports for a world that needs trust.</h1>
+      <div class="sub">QRTP-4 turns QR into cryptographic trust container. Verify authenticity in seconds for tokens, products, documents. <strong>No Passport = No Trust</strong>.</div>
+      <div class="row" style="margin-top:10px">
+        <span class="pill">Protocol v1.0</span>
+        <span class="pill">Ed25519</span>
+        <span class="pill">Tokens • Products • Documents</span>
+      </div>
     </div>
-    
-    <div class="footer">QRTP-4 Protocol v0.2 | No Passport = No Trust</div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>VERIFIER</h2>
+        <div class="k">Paste QR JSON envelope below → check signature + time</div>
+        <div style="height:8px"></div>
+        <textarea id="payload" placeholder='Paste QR JSON here...'></textarea>
+        <div class="row">
+          <button class="btn" onclick="verify()">VERIFY</button>
+          <button class="btn" onclick="loadDemo()">DEMO</button>
+          <button class="btn" onclick="clear()">CLEAR</button>
+          <span class="pill status" id="status">STATUS: —</span>
+        </div>
+        <div style="margin-top:8px;padding:10px;border:var(--b);border-radius:12px;font:11px monospace" id="details">Details appear here.</div>
+      </div>
+
+      <div class="card">
+        <h2>WORLD / ADS</h2>
+        <div class="k" style="margin-bottom:8px">Use cases: Anti-counterfeit • Certificates • Tickets • Supply chain • Tokens</div>
+        <div class="k"><strong>Call to action:</strong> Scan → Verify → Trust. Integrate QRTP-4 into your product flow.</div>
+        <div style="height:10px"></div>
+        <button class="btn" onclick="copyShare()">COPY SHARE TEXT</button>
+        <div class="k" id="hint" style="margin-top:6px"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>HOW IT WORKS</h2>
+      <div class="k">1) Issuer signs passport envelope (Ed25519) → 2) Envelope transported by QR → 3) Verifier checks signature + time window (iat/exp) → 4) Optional registry blocks replays (nonce).</div>
+    </div>
+
+    <div style="margin-top:12px;text-align:center;color:#666;font-size:11px">
+      QRTP-4 Protocol • "No Passport = No Trust"
+    </div>
   </div>
-  
+
   <script>
-    // QRTP-4 Symbol Pools - Multi-language support
-    const QRTP4_POOLS = {
-      core: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
-      symbols: '★☆●◯■□△▽◆◇⊕⊗∴∵',
-      geometry: '▲▼◀▶◢◣◤◥',
-      arrows: '→←↑↓↔↕⇒⇐⇑⇓',
-      cyrillic: 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ',
-      greek: 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ',
-      hebrew: 'אבגדהוזחטיכלמנסעפצקרשת',
-      arabic: 'ابتثجحخدذرزسشصضطظعغفقكلمنهوي',
-      devanagari: 'अआइईउऊऋएऐओऔकखगघङचछजझञटठडढण',
-      thai: 'กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ',
-      hangul: 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ',
-      kana: 'あいうえおかきくけこさしすせそたちつてとなにぬねの',
-      cjk: '一二三四五六七八九十百千万億兆京垓',
-      morse: '·−·−··−−·−−−−·····−····−−···−−−·−−−·····,
-            chemistry: 'HHeLiBeBCNOFNeNaMgAlSiPSClArKCaScTiVCrMnFeCoNiCuZnGaGeAsSeBrKrRbSrYZrNbMoTcRuRhPdAgCdInSnSbTeIXeCsBaLaCePrNdPmSmEuGdTbDyHoErTmYbLuHfTaWReOsIrPtAuHgTlPbBiPoAtRnFrRaAcThPaUNpPuAmCmBkCfEsFmMdNoLrRfDbSgBhHsMtDsRgCnNhFlMcLvTsOg',
-          physics: 'πρστφψωαβγδεζηθκλμνξυχΔΣΦΨΩπ±∞≈≠≤≥√∫∂∇∑∏⊕⊖⊗⊙⟨⟩'
-    };
-    
-    const COREGLYPHS = ['⚡', '🔐', '💎', '♣', '♦'];    const STEP_MS_CORNER = 500;    const STEP_MS_CENTER = 800;
-    
-    const $ = id => document.getElementById(id);
-    const qrCanvas = $('qr');
-    const liveTL = $('liveTL'), liveTR = $('liveTR'), liveBL = $('liveBL'), liveBR = $('liveBR');
-        const centerGlyph = $('centerGlyph'), centerLabel = $('centerLabel');
-    const qrInput = $('qrInput');
-    const verifyBtn = $('verifyBtn'), loadBtn = $('loadBtn');
-    const resultDiv = $('result'), statusDiv = $('status');
-    
-    // Render QR code
-    async function renderQR(data) {
-      const payload = typeof data === 'string' ? data : JSON.stringify(data);
-      await QRCode.toCanvas(qrCanvas, payload, {
-        errorCorrectionLevel: 'H',
-        margin: 2,
-        scale: 6,
-        color: { dark: '#000000', light: '#ffffff' }
-      });
-    }
-    
-    // SHA-256 hash
-    async function sha256(bytes) {
-      const h = await crypto.subtle.digest('SHA-256', bytes);
-      return new Uint8Array(h);
-    }
-    
-    // UTF-8 encode
-    function utf8Bytes(s) {
-      return new TextEncoder().encode(s);
-    }
-    
-    // Pick from pool deterministically
-    function pickFromPool(hash, offset, pool) {
-      return pool[hash[offset % hash.length] % pool.length];
-    }
-    
-    // Generate deterministic corner token
-    async function cornerToken(sigHash, timeStep, cornerId, mode = 'core') {
-      const pool = QRTP4_POOLS[mode] || QRTP4_POOLS.core;
-      const pre = new Uint8Array([...sigHash.slice(0, 16), ...utf8Bytes(timeStep + cornerId)]);
-      const h = await sha256(pre);
-      
-      const c1 = pickFromPool(h, 0, pool);
-      const c2 = pickFromPool(h, 1, pool);
-      return c1 + c2;
-    }
-    
-    // Generate center state
-    async function centerState(sigHash, timeStep, mode = 'core') {
-      const pool = QRTP4_POOLS[mode] || QRTP4_POOLS.core;
-      const pre = new Uint8Array([...sigHash.slice(0, 16), ...utf8Bytes(timeStep + 'CENTER')]);
-      const h = await sha256(pre);
-      
-      const glyph = COREGLYPHS[h[0] % COREGLYPHS.length];      const tag = pickFromPool(h, 1, pool) + pickFromPool(h, 2, pool);
-      return { glyph, tag };
-    }
-    
-    // Live marker rotation
-    let liveTimer = null;
-    
-    function stopLive() {
-      if (liveTimer) {
-        clearInterval(liveTimer);
-        liveTimer = null;
-      }
-    }
-    
-    async function startLive(sigHash, mode = 'core') {
-      stopLive();
-      
-      const tick = async () => {
-        const tc = Math.floor(Date.now() / STEP_MS_CORNER);
-        const tC = Math.floor(Date.now() / STEP_MS_CENTER);
-        
-        const [tl, tr, bl, br] = await Promise.all([
-          cornerToken(sigHash, tc, 'TL', mode),
-          cornerToken(sigHash, tc, 'TR', mode),
-          cornerToken(sigHash, tc, 'BL', mode),
-          cornerToken(sigHash, tc, 'BR', mode)
-        ]);
-        
-        liveTL.textContent = tl;
-        liveTR.textContent = tr;
-        liveBL.textContent = bl;
-        liveBR.textContent = br;
-        
-      const c = await centerState(sigHash, tC, mode);
-      centerGlyph.textContent = c.glyph;
-      centerLabel.textContent = 'QRTP-4 CORE';
-        
-      };
-      
-      liveTimer = setInterval(tick, 140);
-    }
-    
-    // Initialize with demo QR
-    (async () => {
-      await renderQR({ protocol: 'QRTP-4', ts: Date.now() });
-      const demoHash = await sha256(utf8Bytes('DEMO'));
-      await startLive(demoHash);
-    })();
-    
-    // Verify button (placeholder)
-    verifyBtn.onclick = () => {
-      statusDiv.textContent = '✓ Verification system ready';
-      resultDiv.style.display = 'block';
-      resultDiv.className = 'result ok';
-      resultDiv.textContent = 'QRTP-4 Verifier Active';
-    };
-    
-    // Reload button
-    loadBtn.onclick = async () => {
-      statusDiv.textContent = '⟳ Registry synced';
-      await renderQR({ protocol: 'QRTP-4', ts: Date.now() });
-    };
+    function clear(){document.getElementById('payload').value='';document.getElementById('details').textContent='Details appear here.';document.getElementById('status').textContent='STATUS: —'}
+    function copyShare(){const t="QRTP-4 — Global QR Passport Verifier\nSigned QR passports for tokens, products & documents.\nVerify authenticity in seconds.\nhttps://qrtp4.github.io/QRTP-4/";navigator.clipboard.writeText(t).then(()=>{document.getElementById('hint').textContent='Copied.';setTimeout(()=>document.getElementById('hint').textContent='',1500)})}
+    function canonicalize(o){if(o===null||typeof o!=="object")return o;if(Array.isArray(o))return o.map(canonicalize);const r={};Object.keys(o).sort().forEach(k=>r[k]=canonicalize(o[k]));return r}
+    function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+    function verify(){const p=document.getElementById('payload').value.trim();if(!p){document.getElementById('status').textContent='STATUS: EMPTY';return}let e;try{e=JSON.parse(p)}catch(x){document.getElementById('status').textContent='STATUS: INVALID_JSON';document.getElementById('details').textContent='Invalid JSON: '+x.message;return}if(!e.sig||!e.kid){document.getElementById('status').textContent='STATUS: NO_SIG';document.getElementById('details').textContent='Missing sig or kid';return}const pk=b64('EwjZGRuYKFkN+6TdLXGvRdIl8yQp5YmF3Kz/QJxPfUk=');const sig=b64(e.sig);const c={...e};delete c.sig;const msg=new TextEncoder().encode(JSON.stringify(canonicalize(c)));const ok=nacl.sign.detached.verify(msg,sig,pk);const now=Math.floor(Date.now()/1000);let st='VALID';if(!ok)st='FORGED';else if(typeof e.exp==="number"&&now>e.exp)st='EXPIRED';else if(typeof e.iat==="number"&&now<e.iat)st='NOT_YET_VALID';document.getElementById('status').textContent='STATUS: '+st;document.getElementById('details').textContent=`issuer: ${e.iss||'—'}\npid: ${e.pid||'—'}\nkid: ${e.kid||'—'}\niat: ${typeof e.iat==="number"?new Date(e.iat*1000).toISOString():'—'}\nexp: ${typeof e.exp==="number"?new Date(e.exp*1000).toISOString():'—'}\nnow: ${new Date(now*1000).toISOString()}\nsignature: ${ok?'OK':'FAIL'}`}
+    function loadDemo(){const kp=nacl.sign.keyPair();const now=Math.floor(Date.now()/1000);const e={v:"1.0",iss:"QRTP-4",kid:"demo",pid:crypto.randomUUID(),iat:now,exp:now+120,nonce:crypto.randomUUID().slice(0,12),data:{purpose:"demo"}};const msg=new TextEncoder().encode(JSON.stringify(canonicalize(e)));const sig=nacl.sign.detached(msg,kp.secretKey);e.sig=btoa(String.fromCharCode(...sig));document.getElementById('payload').value=JSON.stringify(e,null,2);verify()}
   </script>
 </body>
 </html>

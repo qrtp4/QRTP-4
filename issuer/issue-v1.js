@@ -15,10 +15,19 @@ const KEYS_PATH = path.join(ROOT, "keys.json");
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
+
+// === STABLE STRINGIFY (deterministic key order) ===
+function stableStringify(obj){
+  if(obj === null || typeof obj !== "object") return JSON.stringify(obj);
+  if(Array.isArray(obj)) return "[" + obj.map(stableStringify).join(",") + "]";
+  const keys = Object.keys(obj).sort();
+  return "{" + keys.map(k => JSON.stringify(k)+":"+stableStringify(obj[k])).join(",") + "}";
+}
+
 // === CANONICAL MESSAGE FORMAT ===
 function canonicalMessage(envelope) {
   const { v, iss, kid, pid, iat, exp, nonce, data } = envelope;
-  return `${v}|${iss}|${kid}|${pid}|${iat}|${exp}|${nonce}|${JSON.stringify(data || {})}`;
+  return `${v}|${iss}|${kid}|${pid}|${iat}|${exp}|${nonce}|${stableStringify(data || {})}`;
 }
 
 // === KEY MANAGEMENT ===

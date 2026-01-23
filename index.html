@@ -1,9 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>QRTP-4 Verifier</title>
+  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; min-height: 100vh; padding: 20px; }
@@ -11,46 +13,64 @@
     h1 { color: #58a6ff; margin-bottom: 8px; }
     .subtitle { color: #8b949e; margin-bottom: 24px; }
     .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    textarea { width: 100%; height: 100px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; padding: 12px; font-family: monospace; font-size: 12px; resize: vertical; }
+    .qr-wrap { position: relative; width: 360px; height: 360px; margin: 20px auto; }
+    #realQR { image-rendering: pixelated; width: 360px; height: 360px; }
+    .live-layer { position: absolute; top: 0; left: 0; width: 360px; height: 360px; pointer-events: none; }
+    .live { position: absolute; width: 72px; height: 72px; border: 2px solid #58a6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; background: rgba(0,0,0,0.85); color: #fff; text-shadow: 0 0 10px #58a6ff; }
+    .tl { top: 0; left: 0; }
+    .tr { top: 0; right: 0; }
+    .bl { bottom: 0; left: 0; }
+    .br { bottom: 0; right: 0; }
+    textarea { width: 100%; height: 80px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #c9d1d9; padding: 12px; font-family: monospace; font-size: 11px; resize: vertical; }
     .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 8px; margin-top: 12px; }
     .btn-primary { background: #238636; color: #fff; }
     .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
-    .btn:hover { opacity: 0.9; }
-    .result { margin-top: 16px; }
-    .ok { color: #3fb950; font-weight: 700; }
-    .warn { color: #d29922; font-weight: 700; }
-    .fail { color: #f85149; font-weight: 700; }
-    .info { margin-top: 12px; }
+    .result { margin-top: 16px; padding: 16px; border-radius: 8px; }
+    .ok { background: #238636; color: #fff; }
+    .warn { background: #9e6a03; color: #fff; }
+    .fail { background: #da3633; color: #fff; }
+    .info { margin-top: 12px; font-size: 13px; }
     .info div { padding: 4px 0; }
-    .info b { color: #8b949e; }
-    code { background: #0d1117; padding: 2px 8px; border-radius: 4px; font-size: 13px; }
-    .auto-msg { background: #1f6feb22; border: 1px solid #1f6feb; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    code { background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 4px; }
+    .footer { margin-top: 24px; text-align: center; color: #8b949e; font-size: 12px; }
   </style>
-<script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script></head>
+</head>
 <body>
   <div class="container">
     <h1>QRTP-4 Verifier</h1>
     <p class="subtitle">Passport verification for tokens, products & documents</p>
     
-    <div id="autoResult"></div>
-    
+    <div class="card">
+      <div class="qr-wrap">
+        <canvas id="realQR"></canvas>
+        <div class="live-layer">
+          <div class="live tl" id="tl">--</div>
+          <div class="live tr" id="tr">--</div>
+          <div class="live bl" id="bl">--</div>
+          <div class="live br" id="br">--</div>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <label>QR Content (JSON envelope):</label>
-      <textarea id="qr" placeholder='{"t":"QRTP4","v":"0.1","p":"...","s":"..."}'></textarea>
+      <textarea id="qr" placeholder='{"t":"QRTP4","v":"0.2","p":"...","s":"..."}'></textarea>
       <button class="btn btn-primary" id="verifyBtn">Verify</button>
       <button class="btn btn-secondary" id="loadBtn">Reload Registry</button>
     </div>
+
+    <div id="result" class="result" style="display:none;"></div>
     
-    <div id="result" class="card result" style="display:none;"></div>
-    
-    <p class="subtitle" style="margin-top:24px;font-size:12px;">QRTP-4 Protocol v0.1 | No Passport = No Trust</p>
+    <p class="footer">QRTP-4 Protocol v0.2 | No Passport = No Trust</p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js"></script>
   <script>
     const $ = id => document.getElementById(id);
     let issuers = {}, registry = {};
-    
+    const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const NUM = '23456789';
+    const SYM = '+-*/=$#@!?%&';
+
     function b64urlToBytes(s) {
       const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - (s.length % 4));
       const b64 = s.replaceAll('-', '+').replaceAll('_', '/') + pad;
@@ -59,7 +79,24 @@
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return bytes;
     }
-    
+
+    function rand(set) { return set[Math.floor(Math.random() * set.length)]; }
+
+    function tick(el, mode) {
+      let out = '';
+      if (mode === 1) out = rand(ALPHA) + rand(NUM);
+      if (mode === 2) out = rand(SYM) + rand(ALPHA);
+      if (mode === 3) out = rand(NUM) + rand(NUM) + rand(NUM);
+      if (mode === 4) out = rand(SYM) + rand(SYM);
+      el.textContent = out;
+    }
+
+    // Start live corners animation
+    setInterval(() => tick($('tl'), 1), 400);
+    setInterval(() => tick($('tr'), 2), 530);
+    setInterval(() => tick($('bl'), 3), 460);
+    setInterval(() => tick($('br'), 4), 620);
+
     async function loadData() {
       try {
         issuers = await (await fetch('./verifier/issuers.json', { cache: 'no-store' })).json();
@@ -67,62 +104,108 @@
         return true;
       } catch (e) { console.error('Failed to load registry:', e); return false; }
     }
-    
+
     function verifyEnvelope(envelope) {
-      if (!envelope || envelope.t !== 'QRTP4' || envelope.v !== '0.1') return { ok: false, reason: 'Invalid envelope' };
+      if (!envelope || envelope.t !== 'QRTP4') return { ok: false, reason: 'Invalid envelope type' };
       if (typeof envelope.p !== 'string' || typeof envelope.s !== 'string') return { ok: false, reason: 'Missing payload/signature' };
+      
       const payloadBytes = b64urlToBytes(envelope.p);
       const sigBytes = b64urlToBytes(envelope.s);
       let payload;
       try { payload = JSON.parse(new TextDecoder().decode(payloadBytes)); }
       catch { return { ok: false, reason: 'Invalid payload JSON' }; }
+      
       if (!payload.pid || !payload.iss) return { ok: false, reason: 'Missing required fields' };
+      
+      // Check expiration
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && now > payload.exp) {
+        return { ok: false, reason: 'EXPIRED', payload };
+      }
+      
       const pubB64u = issuers[payload.iss];
-      if (!pubB64u || pubB64u === 'REPLACE_AFTER_FIRST_ISSUE') return { ok: false, reason: 'Unknown issuer: ' + payload.iss };
-      const pubKey = b64urlToBytes(pubB64u);
-      const sigOk = nacl.sign.detached.verify(payloadBytes, sigBytes, pubKey);
-      return { ok: sigOk, reason: sigOk ? 'Signature valid' : 'Signature invalid', payload };
+      if (!pubB64u || pubB64u.includes('REPLACE')) return { ok: false, reason: 'Unknown issuer: ' + payload.iss };
+      
+      try {
+        const pubKey = b64urlToBytes(pubB64u);
+        const sigOk = nacl.sign.detached.verify(payloadBytes, sigBytes, pubKey);
+        return { ok: sigOk, reason: sigOk ? 'AUTHENTIC' : 'BADSIGNATURE', payload };
+      } catch (e) {
+        return { ok: false, reason: 'Verification error: ' + e.message, payload };
+      }
     }
-    
+
     function render(env) {
       const v = verifyEnvelope(env);
-      const st = registry[v.payload?.pid] || { exists: false, status: 'unknown' };
+      const st = registry[v.payload?.pid] || { status: 'unknown' };
       let badge, statusText;
-      if (!v.ok) { badge = 'fail'; statusText = v.reason; }
-      else if (!st.pid) { badge = 'warn'; statusText = 'Signature OK, PID not in registry'; }
-      else if (st.status === 'issued') { badge = 'ok'; statusText = 'VERIFIED (issued)'; }
-      else { badge = 'fail'; statusText = 'REVOKED/SUSPENDED'; }
+      
+      if (v.reason === 'EXPIRED') { badge = 'warn'; statusText = '⏰ EXPIRED'; }
+      else if (v.reason === 'BADSIGNATURE') { badge = 'fail'; statusText = '❌ BAD SIGNATURE'; }
+      else if (!v.ok) { badge = 'fail'; statusText = '❌ ' + v.reason; }
+      else if (!st.pid) { badge = 'warn'; statusText = '⚠️ Signature OK, PID not in registry'; }
+      else if (st.status === 'issued') { badge = 'ok'; statusText = '✅ VERIFIED (AUTHENTIC)'; }
+      else if (st.status === 'revoked') { badge = 'fail'; statusText = '❌ REVOKED'; }
+      else if (st.status === 'suspended') { badge = 'warn'; statusText = '⚠️ SUSPENDED'; }
+      else { badge = 'warn'; statusText = '⚠️ Unknown status'; }
+      
       $('result').style.display = 'block';
+      $('result').className = 'result ' + badge;
       $('result').innerHTML = `
-        <div class="${badge}">${badge === 'ok' ? '✅' : badge === 'warn' ? '⚠️' : '❌'} ${statusText}</div>
-        ${v.ok ? `<div class="info">
+        <div style="font-size:18px;font-weight:700;">${statusText}</div>
+        ${v.payload ? `<div class="info">
           <div><b>PID:</b> <code>${v.payload.pid}</code></div>
           <div><b>Issuer:</b> <code>${v.payload.iss}</code></div>
-          <div><b>Type:</b> <code>${v.payload.typ || '-'}</code></div>
+          <div><b>Type:</b> <code>${v.payload.typ || v.payload.sub || '-'}</code></div>
           <div><b>Ref:</b> <code>${v.payload.ref || '-'}</code></div>
-          <div><b>Status:</b> <code>${st.status || 'unknown'}</code></div>
+          <div><b>Issued:</b> <code>${v.payload.iat ? new Date(v.payload.iat * 1000).toISOString() : '-'}</code></div>
+          <div><b>Expires:</b> <code>${v.payload.exp ? new Date(v.payload.exp * 1000).toISOString() : 'Never'}</code></div>
+          <div><b>Registry:</b> <code>${st.status || 'not found'}</code></div>
         </div>` : ''}
       `;
     }
-    
+
+    async function generateDemoQR() {
+      const demoPayload = {
+        v: '0.2',
+        iss: 'qrtp4',
+        pid: 'DEMO-' + Date.now().toString(36).toUpperCase(),
+        sub: 'demo',
+        iat: Math.floor(Date.now() / 1000),
+        data: { label: 'QRTP-4 Demo Passport' }
+      };
+      const payloadStr = JSON.stringify(demoPayload);
+      await QRCode.toCanvas($('realQR'), payloadStr, {
+        errorCorrectionLevel: 'H',
+        margin: 2,
+        scale: 6,
+        color: { dark: '#58a6ff', light: '#0d1117' }
+      });
+    }
+
     async function main() {
       await loadData();
+      await generateDemoQR();
+      
+      // Check URL hash for auto-verify
       const hash = location.hash.slice(1);
       if (hash) {
-        $('autoResult').innerHTML = '<div class="auto-msg">Auto-verifying from URL...</div>';
         try {
-          const env = JSON.parse(decodeURIComponent(hash));
-          $('qr').value = JSON.stringify(env);
+          const decoded = new TextDecoder().decode(b64urlToBytes(hash));
+          const env = JSON.parse(decoded);
+          $('qr').value = JSON.stringify(env, null, 2);
           render(env);
-          $('autoResult').innerHTML = '';
-        } catch { $('autoResult').innerHTML = '<div class="auto-msg" style="border-color:#f85149;background:#f8514922;">Failed to parse URL token</div>'; }
+        } catch { console.log('Could not parse URL hash'); }
       }
+      
       $('verifyBtn').onclick = () => {
         try { render(JSON.parse($('qr').value.trim())); }
-        catch { $('result').style.display = 'block'; $('result').innerHTML = '<div class="fail">❌ Invalid JSON</div>'; }
+        catch { $('result').style.display = 'block'; $('result').className = 'result fail'; $('result').innerHTML = '<div style="font-size:18px;font-weight:700;">❌ Invalid JSON</div>'; }
       };
+      
       $('loadBtn').onclick = async () => { await loadData(); alert('Registry reloaded'); };
     }
+    
     main();
   </script>
 </body>

@@ -1,85 +1,87 @@
-# QRTP-4 👑
-**QR Token Passport Registry**
+# QRTP-4 — Trust Passport Protocol (v1.0)
 
-Identity • Verification • Anti-Fake • Trust Layer
+QRTP-4 is a passport-layer trust protocol for wallets, assets, and documents.
 
-![Views](https://komarev.com/ghpvc/?username=qrtp4&label=Profile%20Views&color=blue&style=flat)
-![GitHub stars](https://img.shields.io/github/stars/qrtp4/QRTP-4?style=social)
+It provides:
+- **Cryptographic authenticity (Ed25519 signatures)**
+- **Public verification (GitHub Pages portal)**
+- **Registry status control (issued / suspended / revoked)**
+- **Scan-safe visual recognition layer (QRTP-4 Mark)**
 
+**No Passport = No Trust.**
 
 ---
 
-## ⚡ Quick Start (Issue → Verify)
+## Live Portal (Scan → Auto-Verify)
 
-### 1) Install issuer dependencies
+✅ Official portal:
+[https://qrtp4.github.io/QRTP-4/](https://qrtp4.github.io/QRTP-4/)
+
+- Works instantly from any QR scan
+- Auto-decodes token from URL hash
+- Verifies signature + registry status
+
+---
+
+## Quick Start (Issue → Scan → Verify)
+
+### 1) Issue locally (creates signed envelope + QR)
 ```bash
 cd issuer
 npm install
+node issue-v1.js wallet xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k "XRP (Primary)"
 ```
 
-### 2) Issue locally (creates signed envelope + QR)``
-```bash
-cd issuer
-npm install`bash
-node issue-v1.js wallet xrp:rW6mfR5R8PEqY6idUB2Hz7HgvhS72S96k "XRP (Primary)"```
+This outputs:
+- A signed QRTP-4 envelope (JSON)
+- A scannable QR code that opens the portal link:
+  ```
+  https://qrtp4.github.io/QRTP-4/#<token>
+  ```
 
-### 3) Verify on the public portalOpen: [https://qrtp4.github.io/QRTP-4/](https://qrtp4.github.io/QRTP-4/)
-Paste the JSON envelope OR open the portal link embedded in the QR (auto-verify).
-```bash
-node revoke.js <pid>
+### 2) Verify (public)
+Scan the QR with any phone camera.
+
+Result shows:
+- ✅ VERIFIED
+- ⚠️ SUSPENDED
+- ❌ REVOKED
+- ❌ INVALID SIGNATURE
+
+---
+
+## Envelope Format (v1.0)
+
+Canonical signed message format:
+```
+v|iss|kid|pid|iat|exp|nonce|data
 ```
 
-> **No Passport = No Trust.**
-> **No Passport = No Trust.**
+Envelope fields:
+- `v` — protocol version
+- `iss` — issuer ID
+- `kid` — key ID
+- `pid` — Passport ID
+- `iat` — issued-at timestamp
+- `exp` — expiration timestamp
+- `nonce` — anti-replay salt
+- `data` — payload (wallet / asset / document data)
+- `sig` — Ed25519 signature (base64)
 
 ---
 
-## 🧬 What is QRTP-4?
+## Trust Data (Source of Truth)
 
-QRTP-4 is a verification protocol and registry system designed to give every token a **passport** —
-a unique identity layer that protects authenticity, origin, and trust.
+Public trust registry:
+- `verifier/issuers.json` — issuer public keys
+- `verifier/registry.json` — PID status registry
 
----
-
-## 🛡️ Core Features
-
-- ✅ Token identity & passport issuance
-- ✅ Authenticity validation
-- ✅ Anti-fake protection layer
-- ✅ Registry logic and proof levels
+Status values:
+- `issued` (valid)
+- `suspended` (valid signature, temporarily blocked)
+- `revoked` (permanent rejection)
 
 ---
 
-## 📁 Structure
-
-| File | Description |
-|------|-------------|
-| `QRTP-4.md` | Main protocol logic |
-| `CHANGELOG.md` | Version history |
-| `LICENSE` | MIT License |
-
----
-
-## 📜 License
-
-MIT — Open and free to use.
-
----
-
-## 📡 Links
-
-- GitHub: [github.com/qrtp4](https://github.com/qrtp4)
-
----
-
-## 🚧 Roadmap
-
-- [x] QRTP-4 Core Logic
-- [x] Passport Issuance Module
-- [x] Verification API
-- [x] Anti-Fake Scanner
-- [ ] Public Registry Explorer
-
----
-
-**QRTP-4** — *No Passport = No Trust.*
+## License
+MIT

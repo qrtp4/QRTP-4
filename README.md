@@ -78,10 +78,10 @@ MIT — Open and free to use.
 
 ## 🚧 Roadmap
 
-- [ ] QRTP-4 Core Logic
-- [ ] Passport Issuance Module
-- [ ] Verification API
-- [ ] Anti-Fake Scanner
+- [x] QRTP-4 Core Logic
+- [x] Passport Issuance Module
+- [x] Verification API
+- [x] Anti-Fake Scanner
 - [ ] Public Registry Explorer
 
 ---

@@ -90,5 +90,52 @@
   function verify(){const p=document.getElementById('payload').value.trim();if(!p){document.getElementById('status').textContent='STATUS: EMPTY';return}let e;try{e=JSON.parse(p)}catch(x){document.getElementById('status').textContent='STATUS: INVALID_JSON';document.getElementById('details').textContent='Invalid JSON: '+x.message;return}if(!e.sig||!e.kid){document.getElementById('status').textContent='STATUS: NO_SIG';document.getElementById('details').textContent='Missing sig or kid';return}const pk=b64('EwjZGRuYKFkN+6TdLXGvRdIl8yQp5YmF3Kz/QJxPfUk=');const sig=b64(e.sig);const msg=new TextEncoder().encode(canonicalMessage(e));const ok=nacl.sign.detached.verify(msg,sig,pk);const now=Math.floor(Date.now()/1000);let st='VALID';if(!ok)st='FORGED';else if(typeof e.exp==="number"&&now>e.exp)st='EXPIRED';else if(typeof e.iat==="number"&&now<e.iat)st='NOT_YET_VALID';document.getElementById('status').textContent='STATUS: '+st;document.getElementById('details').textContent=`issuer: ${e.iss||'—'}\npid: ${e.pid||'—'}\nkid: ${e.kid||'—'}\niat: ${typeof e.iat==="number"?new Date(e.iat*1000).toISOString():'—'}\nexp: ${typeof e.exp==="number"?new Date(e.exp*1000).toISOString():'—'}\nnow: ${new Date(now*1000).toISOString()}\nsignature: ${ok?'OK':'FAIL'}`}
   function loadDemo(){const sk=b64('sBUU5aMQ5hP1Rc/JAwcqo1D6WGaFRyoJQJm6KR1ZqgkTCNkZG5goWQ37pN0tca9F0iXzJCnliYXcrP9AnE99SQ==');const now=Math.floor(Date.now()/1000);const e={v:"1.0",iss:"QRTP-4",kid:"demo",pid:crypto.randomUUID(),iat:now,exp:now+120,nonce:crypto.randomUUID().slice(0,12),data:{purpose:"demo"}};const msg=new TextEncoder().encode(canonicalMessage(e));const sig=nacl.sign.detached(msg,sk);e.sig=btoa(String.fromCharCode(...sig));document.getElementById('payload').value=JSON.stringify(e,null,2);verify()}
 </script>
+  <script>
+  function b64urlToBytes(b64url) {
+    const pad = b64url.length % 4 ? "=".repeat(4 - (b64url.length % 4)) : "";
+    const b64 = (b64url + pad).replace(/-/g, "+").replace(/_/g, "/");
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function decodeEnvelopeFromHash() {
+    const raw = (location.hash || "").slice(1).trim();
+    if (!raw) return null;
+
+    // 1) legacy: hash contains JSON directly
+    if (raw.startsWith("{") || raw.startsWith("%7B")) {
+      const text = raw.startsWith("%7B") ? decodeURIComponent(raw) : raw;
+      return JSON.parse(text);
+    }
+
+    // 2) base64url token: hash is token (base64url(JSON))
+    const bytes = b64urlToBytes(raw);
+    const text = new TextDecoder().decode(bytes);
+    return JSON.parse(text);
+  }
+
+  // COMMAND: run on load
+  window.addEventListener("load", () => {
+    try {
+      const env = decodeEnvelopeFromHash();
+      if (!env) return;
+
+      // если у тебя есть textarea/input для JSON — заполни его
+      const box = document.querySelector("textarea, #qrInput, #envelope, #payload");
+      if (box) box.value = JSON.stringify(env, null, 2);
+
+      // если у тебя есть кнопка verify — нажми её программно
+      const btn =
+        document.querySelector("#btnVerify") ||
+        document.querySelector("button#verify") ||
+        [...document.querySelectorAll("button")].find(b => /verify/i.test(b.textContent || ""));
+      if (btn) btn.click();
+    } catch (e) {
+      console.warn("Auto-verify failed:", e);
+    }
+  });
+</script>
 </body>
 </html>

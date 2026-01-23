@@ -7,94 +7,88 @@
   <meta name="description" content="QRTP-4: cryptographic QR passports. Verify authenticity in seconds for tokens, products & documents." />
   <meta property="og:title" content="QRTP-4 — Global QR Passport Verifier" />
   <script src="https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl.min.js"></script>
-  <style>
-    :root{--bg:#fff;--fg:#000;--b:2px solid #000;--r:16px}
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system}
-    .wrap{max-width:1020px;margin:0 auto;padding:24px 16px 60px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .seal{width:36px;height:36px;border:var(--b);border-radius:999px;display:grid;place-items:center;font-weight:900}
-    .btn{border:var(--b);border-radius:999px;padding:8px 12px;background:#fff;cursor:pointer;font-weight:700;font-size:12px}
-    .btn:hover{transform:translateY(-1px)}
-    .hero{margin:20px 0;border:var(--b);border-radius:var(--r);padding:18px}
-    h1{margin:0 0 8px;font-size:26px}
-    .sub{color:#666;font-size:14px}
-    .pill{border:var(--b);border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-    @media (max-width:820px){.grid{grid-template-columns:1fr}}
-    .card{border:var(--b);border-radius:var(--r);padding:14px}
-    h2{margin:0 0 8px;font-size:14px;font-weight:900}
-    .k{font-size:12px;color:#666}
-    textarea{width:100%;min-height:120px;border:var(--b);border-radius:12px;padding:10px;font:11px monospace;resize:vertical}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .status{font-weight:900}
-  </style>
+<style>
+  :root{--bg:#fff;--fg:#000;--b:2px solid #000;--r:16px}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system}
+  .wrap{max-width:1020px;margin:0 auto;padding:24px 16px 60px}
+  .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .seal{width:36px;height:36px;border:var(--b);border-radius:999px;display:grid;place-items:center;font-weight:900}
+  .btn{border:var(--b);border-radius:999px;padding:8px 12px;background:#fff;cursor:pointer;font-weight:700;font-size:12px}
+  .btn:hover{transform:translateY(-1px)}
+  .hero{margin:20px 0;border:var(--b);border-radius:var(--r);padding:18px}
+  h1{margin:0 0 8px;font-size:26px}
+  .sub{color:#666;font-size:14px}
+  .pill{border:var(--b);border-radius:999px;padding:5px 8px;font-size:11px;font-weight:700}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  @media (max-width:820px){.grid{grid-template-columns:1fr}}
+  .card{border:var(--b);border-radius:var(--r);padding:14px}
+  h2{margin:0 0 8px;font-size:14px;font-weight:900}
+  .k{font-size:12px;color:#666}
+  textarea{width:100%;min-height:120px;border:var(--b);border-radius:12px;padding:10px;font:11px monospace;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .status{font-weight:900}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="seal">4</div>
-        <div>
-          <div style="font-weight:900;letter-spacing:.04em">QRTP-4</div>
-          <div class="k">Global QR Passport Verifier</div>
-        </div>
-      </div>
-      <button class="btn" onclick="scrollTo({top:0,behavior:'smooth'})">VERIFY NOW</button>
-    </div>
-
-    <div class="hero">
-      <h1>Signed QR Passports for a world that needs trust.</h1>
-      <div class="sub">QRTP-4 turns QR into cryptographic trust container. Verify authenticity in seconds for tokens, products, documents. <strong>No Passport = No Trust</strong>.</div>
-      <div class="row" style="margin-top:10px">
-        <span class="pill">Protocol v1.0</span>
-        <span class="pill">Ed25519</span>
-        <span class="pill">Tokens • Products • Documents</span>
+<div class="wrap">
+  <div class="top">
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="seal">4</div>
+      <div>
+        <div style="font-weight:900;font-size:18px">QRTP-4</div>
+        <div style="font-size:11px;color:#666">Global QR Passport Verifier</div>
       </div>
     </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>VERIFIER</h2>
-        <div class="k">Paste QR JSON envelope below → check signature + time</div>
-        <div style="height:8px"></div>
-        <textarea id="payload" placeholder='Paste QR JSON here...'></textarea>
-        <div class="row">
-          <button class="btn" onclick="verify()">VERIFY</button>
-          <button class="btn" onclick="loadDemo()">DEMO</button>
-          <button class="btn" onclick="clear()">CLEAR</button>
-          <span class="pill status" id="status">STATUS: —</span>
-        </div>
-        <div style="margin-top:8px;padding:10px;border:var(--b);border-radius:12px;font:11px monospace" id="details">Details appear here.</div>
-      </div>
-
-      <div class="card">
-        <h2>WORLD / ADS</h2>
-        <div class="k" style="margin-bottom:8px">Use cases: Anti-counterfeit • Certificates • Tickets • Supply chain • Tokens</div>
-        <div class="k"><strong>Call to action:</strong> Scan → Verify → Trust. Integrate QRTP-4 into your product flow.</div>
-        <div style="height:10px"></div>
-        <button class="btn" onclick="copyShare()">COPY SHARE TEXT</button>
-        <div class="k" id="hint" style="margin-top:6px"></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <h2>HOW IT WORKS</h2>
-      <div class="k">1) Issuer signs passport envelope (Ed25519) → 2) Envelope transported by QR → 3) Verifier checks signature + time window (iat/exp) → 4) Optional registry blocks replays (nonce).</div>
-    </div>
-
-    <div style="margin-top:12px;text-align:center;color:#666;font-size:11px">
-      QRTP-4 Protocol • "No Passport = No Trust"
+    <button class="btn" onclick="document.getElementById('payload').focus()">VERIFY NOW</button>
+  </div>
+  <div class="hero">
+    <h1>Signed QR Passports for a world that needs trust.</h1>
+    <div class="sub">QRTP-4 turns QR into cryptographic trust container. Verify authenticity in seconds for tokens, products, documents. <strong>No Passport = No Trust</strong>.</div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <div class="pill">Protocol v1.0</div>
+      <div class="pill">Ed25519</div>
+      <div class="pill">Tokens • Products • Documents</div>
     </div>
   </div>
-
-  <script>
-    function clear(){document.getElementById('payload').value='';document.getElementById('details').textContent='Details appear here.';document.getElementById('status').textContent='STATUS: —'}
-    function copyShare(){const t="QRTP-4 — Global QR Passport Verifier\nSigned QR passports for tokens, products & documents.\nVerify authenticity in seconds.\nhttps://qrtp4.github.io/QRTP-4/";navigator.clipboard.writeText(t).then(()=>{document.getElementById('hint').textContent='Copied.';setTimeout(()=>document.getElementById('hint').textContent='',1500)})}
-    function canonicalize(o){if(o===null||typeof o!=="object")return o;if(Array.isArray(o))return o.map(canonicalize);const r={};Object.keys(o).sort().forEach(k=>r[k]=canonicalize(o[k]));return r}
-    function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
-    function verify(){const p=document.getElementById('payload').value.trim();if(!p){document.getElementById('status').textContent='STATUS: EMPTY';return}let e;try{e=JSON.parse(p)}catch(x){document.getElementById('status').textContent='STATUS: INVALID_JSON';document.getElementById('details').textContent='Invalid JSON: '+x.message;return}if(!e.sig||!e.kid){document.getElementById('status').textContent='STATUS: NO_SIG';document.getElementById('details').textContent='Missing sig or kid';return}const pk=b64('EwjZGRuYKFkN+6TdLXGvRdIl8yQp5YmF3Kz/QJxPfUk=');const sig=b64(e.sig);const c={...e};delete c.sig;const msg=new TextEncoder().encode(JSON.stringify(canonicalize(c)));const ok=nacl.sign.detached.verify(msg,sig,pk);const now=Math.floor(Date.now()/1000);let st='VALID';if(!ok)st='FORGED';else if(typeof e.exp==="number"&&now>e.exp)st='EXPIRED';else if(typeof e.iat==="number"&&now<e.iat)st='NOT_YET_VALID';document.getElementById('status').textContent='STATUS: '+st;document.getElementById('details').textContent=`issuer: ${e.iss||'—'}\npid: ${e.pid||'—'}\nkid: ${e.kid||'—'}\niat: ${typeof e.iat==="number"?new Date(e.iat*1000).toISOString():'—'}\nexp: ${typeof e.exp==="number"?new Date(e.exp*1000).toISOString():'—'}\nnow: ${new Date(now*1000).toISOString()}\nsignature: ${ok?'OK':'FAIL'}`}
-    function loadDemo(){const kp=nacl.sign.keyPair();const now=Math.floor(Date.now()/1000);const e={v:"1.0",iss:"QRTP-4",kid:"demo",pid:crypto.randomUUID(),iat:now,exp:now+120,nonce:crypto.randomUUID().slice(0,12),data:{purpose:"demo"}};const msg=new TextEncoder().encode(JSON.stringify(canonicalize(e)));const sig=nacl.sign.detached(msg,kp.secretKey);e.sig=btoa(String.fromCharCode(...sig));document.getElementById('payload').value=JSON.stringify(e,null,2);verify()}
-  </script>
+  <div class="grid">
+    <div class="card">
+      <h2>VERIFIER</h2>
+      <div class="k">Paste QR JSON envelope below → check signature + time</div>
+      <div style="height:8px"></div>
+      <textarea id="payload" placeholder='Paste QR JSON here...'></textarea>
+      <div class="row">
+        <button class="btn" onclick="verify()">VERIFY</button>
+        <button class="btn" onclick="loadDemo()">DEMO</button>
+        <button class="btn" onclick="clear()">CLEAR</button>
+        <span class="pill status" id="status">STATUS: —</span>
+      </div>
+      <div style="margin-top:8px;padding:10px;border:var(--b);border-radius:12px;font:11px monospace" id="details">Details appear here.</div>
+    </div>
+    <div class="card">
+      <h2>WORLD / ADS</h2>
+      <div class="k" style="margin-bottom:8px">Use cases: Anti-counterfeit • Certificates • Tickets • Supply chain • Tokens</div>
+      <div class="k"><strong>Call to action:</strong> Scan → Verify → Trust. Integrate QRTP-4 into your product flow.</div>
+      <div style="height:10px"></div>
+      <button class="btn" onclick="copyShare()">COPY SHARE TEXT</button>
+      <div class="k" id="hint" style="margin-top:6px"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h2>HOW IT WORKS</h2>
+    <div class="k">1) Issuer signs passport envelope (Ed25519) → 2) Envelope transported by QR → 3) Verifier checks signature + time window (iat/exp) → 4) Optional registry blocks replays (nonce).</div>
+  </div>
+  <div style="margin-top:12px;text-align:center;color:#666;font-size:11px">
+    QRTP-4 Protocol • "No Passport = No Trust"
+  </div>
+</div>
+<script>
+  function clear(){document.getElementById('payload').value='';document.getElementById('details').textContent='Details appear here.';document.getElementById('status').textContent='STATUS: —'}
+  function copyShare(){const t="QRTP-4 — Global QR Passport Verifier\nSigned QR passports for tokens, products & documents.\nVerify authenticity in seconds.\nhttps://qrtp4.github.io/QRTP-4/";navigator.clipboard.writeText(t).then(()=>{document.getElementById('hint').textContent='Copied.';setTimeout(()=>document.getElementById('hint').textContent='',1500)})}
+  function canonicalize(o){if(o===null||typeof o!=="object")return o;if(Array.isArray(o))return o.map(canonicalize);const r={};Object.keys(o).sort().forEach(k=>r[k]=canonicalize(o[k]));return r}
+  function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+  function verify(){const p=document.getElementById('payload').value.trim();if(!p){document.getElementById('status').textContent='STATUS: EMPTY';return}let e;try{e=JSON.parse(p)}catch(x){document.getElementById('status').textContent='STATUS: INVALID_JSON';document.getElementById('details').textContent='Invalid JSON: '+x.message;return}if(!e.sig||!e.kid){document.getElementById('status').textContent='STATUS: NO_SIG';document.getElementById('details').textContent='Missing sig or kid';return}const pk=b64('EwjZGRuYKFkN+6TdLXGvRdIl8yQp5YmF3Kz/QJxPfUk=');const sig=b64(e.sig);const c={...e};delete c.sig;const msg=new TextEncoder().encode(JSON.stringify(canonicalize(c)));const ok=nacl.sign.detached.verify(msg,sig,pk);const now=Math.floor(Date.now()/1000);let st='VALID';if(!ok)st='FORGED';else if(typeof e.exp==="number"&&now>e.exp)st='EXPIRED';else if(typeof e.iat==="number"&&now<e.iat)st='NOT_YET_VALID';document.getElementById('status').textContent='STATUS: '+st;document.getElementById('details').textContent=`issuer: ${e.iss||'—'}\npid: ${e.pid||'—'}\nkid: ${e.kid||'—'}\niat: ${typeof e.iat==="number"?new Date(e.iat*1000).toISOString():'—'}\nexp: ${typeof e.exp==="number"?new Date(e.exp*1000).toISOString():'—'}\nnow: ${new Date(now*1000).toISOString()}\nsignature: ${ok?'OK':'FAIL'}`}
+  function loadDemo(){const sk=b64('sBUU5aMQ5hP1Rc/JAwcqo1D6WGaFRyoJQJm6KR1ZqgkTCNkZG5goWQ37pN0tca9F0iXzJCnliYXcrP9AnE99SQ==');const pk=b64('EwjZGRuYKFkN+6TdLXGvRdIl8yQp5YmF3Kz/QJxPfUk=');const now=Math.floor(Date.now()/1000);const e={v:"1.0",iss:"QRTP-4",kid:"demo",pid:crypto.randomUUID(),iat:now,exp:now+120,nonce:crypto.randomUUID().slice(0,12),data:{purpose:"demo"}};const msg=new TextEncoder().encode(JSON.stringify(canonicalize(e)));const sig=nacl.sign.detached(msg,sk);e.sig=btoa(String.fromCharCode(...sig));document.getElementById('payload').value=JSON.stringify(e,null,2);verify()}
+</script>
 </body>
 </html>

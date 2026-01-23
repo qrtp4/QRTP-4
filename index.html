@@ -105,7 +105,6 @@
     const $ = id => document.getElementById(id);
     const qrCanvas = $('qr');
     const liveTL = $('liveTL'), liveTR = $('liveTR'), liveBL = $('liveBL'), liveBR = $('liveBR');
-    const centerGlyph = $('centerGlyph'), centerPulse = $('centerPulse');
     const qrInput = $('qrInput');
     const verifyBtn = $('verifyBtn'), loadBtn = $('loadBtn');
     const resultDiv = $('result'), statusDiv = $('status');
@@ -188,12 +187,8 @@
         liveBL.textContent = bl;
         liveBR.textContent = br;
         
-        const c = await centerState(sigHash, tC, mode);
-        centerGlyph.textContent = c.glyph;
-        centerPulse.textContent = `QRTP-4 ${c.tag}`;
       };
       
-      await tick();
       liveTimer = setInterval(tick, 140);
     }
     
